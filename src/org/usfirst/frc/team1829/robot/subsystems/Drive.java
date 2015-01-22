@@ -160,12 +160,28 @@ public class Drive
 		xAdapter = new DrivePIDAdapter(DrivePIDType.X);
 		yAdapter = new DrivePIDAdapter(DrivePIDType.Y);
 		rotateAdapter = new DrivePIDAdapter(DrivePIDType.ROTATE);
-		
 		xController = new PIDController(xP, xI, xD, xAdapter, xAdapter);
 		yController = new PIDController(yP, yI, yD, yAdapter, yAdapter);
 		rotateController = new PIDController(rotateP, rotateI, rotateD, rotateAdapter, rotateAdapter);
+		
+		/*
+		 * Example settings for Encoders.  Actual values needed.
+		 */
+		encoderFrontLeft.setDistancePerPulse(12.0/300.0); //TODO remove magic numbers
+		encoderFrontLeft.setReverseDirection(false);
+		encoderFrontLeft.setMaxPeriod(0.5); //0.5 is default max period to detect if stopped
+		encoderRearLeft.setDistancePerPulse(12.0/300);
+		encoderRearLeft.setReverseDirection(false);
+		encoderFrontRight.setDistancePerPulse(12.0/300.0);
+		encoderFrontRight.setReverseDirection(true);
+		encoderRearRight.setDistancePerPulse(12.0/300.0);
+		encoderRearRight.setReverseDirection(true);
+		
+		ultrasonic.setAutomaticMode(true); //Ensures that multiple ultrasonic sensors don't interfere
+		
+		//driveTrain.mecanumDrive_Cartesian(x, y, rotation, gyroAngle);
 	}
-
+	
 	/**
 	 * Sets a Command that will be launched whenever
 	 * the Drive subsystem is at rest, i.e. there is

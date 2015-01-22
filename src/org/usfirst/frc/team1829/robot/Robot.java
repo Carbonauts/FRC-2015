@@ -33,8 +33,24 @@ public class Robot extends IterativeRobot
 	public static final int DRIVE_ULTRASONIC_B = 0;
 	public static final int DRIVE_GYRO = 0;
 	
+	public static final int ELEVATOR_TALON = 0;
+	public static final int ELEVATOR_LIMIT_TOP = 0;
+	public static final int ELEVATOR_LIMIT_BOT = 0;
+	
+	/**
+	 * The active UI element for the Robot.
+	 */
 	private static CarbonUI ui;
 
+	/**
+	 * Returns the active UI.
+	 * @return the active UI.
+	 */
+	public static CarbonUI getUI()
+    {
+    	return ui;
+    }
+	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -44,11 +60,6 @@ public class Robot extends IterativeRobot
         ui = new CarbonUI();
         ui.addControl("Shooter", ControlType.BUTTON, 1, 1);
         ui.addControl("Pickup", ControlType.AXIS, 1, 2);
-    }
-    
-    public static CarbonUI getUI()
-    {
-    	return ui;
     }
 	
 	public void disabledPeriodic() 
@@ -70,7 +81,7 @@ public class Robot extends IterativeRobot
     }
 
     /**
-     * This function is called periodically during teleop.
+     * This function is called at the beginning of teleop.
      */
     public void teleopInit() 
     {
