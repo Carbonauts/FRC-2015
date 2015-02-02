@@ -13,13 +13,26 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 
 /**
  * Subsystem that controls the vertical movement of the
- * Container-grabbing arm (boom).  This implements a 
+ * Container-grabbing arm (conveyor).  This implements a 
  * PID control system to allow smooth movement.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
- *
  */
 public class Elevator extends Subsystem
-{	
+{
+	/**
+	 * Enumeration that defines preset positions that the Elevator
+	 * may move to.
+	 * @author Nick Mosher, Team 1829 Carbonauts Captain
+	 */
+	public enum Position {
+		LEVEL1,
+		LEVEL2,
+		LEVEL3,
+		LEVEL4,
+		LEVEL5,
+		LEVEL6
+	}
+	
 	/**
 	 * Custom class that acts as a middle-man between
 	 * the sensors, PID controllers, and the outputs.
@@ -73,7 +86,7 @@ public class Elevator extends Subsystem
 											   elevatorD, 
 											   elevatorAdapter, 
 											   elevatorAdapter);
-		elevatorTalon = new Talon(Robot.ELEVATOR_TALON);
+		elevatorTalon = new Talon(Robot.ELEVATOR_MOTOR);
 		topLimit = new CarbonDigitalInput(Robot.ELEVATOR_LIMIT_TOP);
 		botLimit = new CarbonDigitalInput(Robot.ELEVATOR_LIMIT_BOT);
 	}
@@ -145,7 +158,11 @@ public class Elevator extends Subsystem
 	 */
 	public class ElevatorPIDAdapter implements PIDSource, PIDOutput
 	{
-
+		public ElevatorPIDAdapter()
+		{
+			
+		}
+		
 		/**
 		 * The output of the PID calculations.  This is where
 		 * we get the instructions to pass to a motor or
