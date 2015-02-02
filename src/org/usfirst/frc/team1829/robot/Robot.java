@@ -1,5 +1,11 @@
 package org.usfirst.frc.team1829.robot;
 
+import org.usfirst.frc.team1829.robot.subsystems.Conveyor;
+import org.usfirst.frc.team1829.robot.subsystems.Drive;
+import org.usfirst.frc.team1829.robot.subsystems.Elevator;
+import org.usfirst.frc.team1829.robot.subsystems.Jaw;
+import org.usfirst.frc.team1829.robot.subsystems.Turret;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -16,40 +22,48 @@ import com.team1829.library.CarbonUI.ControlType;
  */
 public class Robot extends IterativeRobot 
 {
+	//Unique control identifiers
+	public static final String UI_DRIVE_Y = "0x00";
+	public static final String UI_DRIVE_X = "0x01";
+	public static final String UI_DRIVE_R = "0x02";
+	
 	//TODO add real PWM channel numbers.
+	//Drive PWMs
 	public static final int DRIVE_FRONT_LEFT = 0;
 	public static final int DRIVE_FRONT_RIGHT = 0;
 	public static final int DRIVE_REAR_LEFT = 0;
 	public static final int DRIVE_REAR_RIGHT = 0;
-	public static final int DRIVE_ENCODER_FRONT_LEFT_A = 0;
-	public static final int DRIVE_ENCODER_FRONT_LEFT_B = 0;
-	public static final int DRIVE_ENCODER_FRONT_RIGHT_A = 0;
-	public static final int DRIVE_ENCDOER_FRONT_RIGHT_B = 0;
-	public static final int DRIVE_ENCODER_REAR_LEFT_A = 0;
-	public static final int DRIVE_ENCODER_REAR_LEFT_B = 0;
-	public static final int DRIVE_ENCODER_REAR_RIGHT_A = 0;
-	public static final int DRIVE_ENCDOER_REAR_RIGHT_B = 0;
 	public static final int DRIVE_ULTRASONIC_A = 0;
 	public static final int DRIVE_ULTRASONIC_B = 0;
 	public static final int DRIVE_GYRO = 0;
-	
-	public static final int ELEVATOR_TALON = 0;
+	//Turret PWMs
+	public static final int TURRET_MOTOR = 0;
+	public static final int TURRET_ENCODER_A = 0;
+	public static final int TURRET_ENCODER_B = 0;
+	public static final int TURRET_LIMIT_LEFT = 0;
+	public static final int TURRET_LIMIT_RIGHT = 0;
+	//Elevator PWMs
+	public static final int ELEVATOR_MOTOR = 0;
 	public static final int ELEVATOR_LIMIT_TOP = 0;
 	public static final int ELEVATOR_LIMIT_BOT = 0;
+	//Conveyor PWMs
+	public static final int CONVEYOR_MOTOR = 0;
+	public static final int CONVEYOR_ENCODER_A = 0;
+	public static final int CONVEYOR_ENCODER_B = 0;
+	//Jaw PWMs
+	public static final int JAW_GRAB_MOTOR = 0;
+	public static final int JAW_FEED_MOTOR = 0;
+	public static final int JAW_LIMIT = 0;
 	
 	/**
 	 * The active UI element for the Robot.
 	 */
 	private static CarbonUI ui;
-
-	/**
-	 * Returns the active UI.
-	 * @return the active UI.
-	 */
-	public static CarbonUI getUI()
-    {
-    	return ui;
-    }
+	private static Drive carbonDrive;
+	private static Turret carbonTurret;
+	private static Elevator carbonElevator;
+	private static Conveyor carbonConveyor;
+	private static Jaw carbonJaw;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -58,8 +72,14 @@ public class Robot extends IterativeRobot
     public void robotInit() 
     {
         ui = new CarbonUI();
-        ui.addControl("Shooter", ControlType.BUTTON, 1, 1);
-        ui.addControl("Pickup", ControlType.AXIS, 1, 2);
+        ui.addControl(UI_DRIVE_Y, ControlType.AXIS, 2, 1);
+        ui.addControl(UI_DRIVE_R, ControlType.AXIS, 3, 1);
+        
+        carbonDrive = new Drive();
+        carbonTurret = new Turret();
+        carbonElevator = new Elevator();
+        carbonConveyor = new Conveyor();
+        carbonJaw = new Jaw();
     }
 	
 	public void disabledPeriodic() 
@@ -112,4 +132,58 @@ public class Robot extends IterativeRobot
     {
         LiveWindow.run();
     }
+    
+    /**
+	 * Returns the active UI.
+	 * @return the active UI.
+	 */
+	public static CarbonUI getUI()
+    {
+    	return ui;
+    }
+	
+	/**
+	 * Returns the instance of the drive system.
+	 * @return The instance of the drive system.
+	 */
+	public static Drive getDrive()
+	{
+		return carbonDrive;
+	}
+	
+	/**
+	 * Returns the instance of the turret system.
+	 * @return The instance of the turret system.
+	 */
+	public static Turret getTurret()
+	{
+		return carbonTurret;
+	}
+	
+	/**
+	 * Returns the instance of the elevator system.
+	 * @return The instance of the elevator system.
+	 */
+	public static Elevator getElevator()
+	{
+		return carbonElevator;
+	}
+	
+	/**
+	 * Returns the instance of the conveyor system.
+	 * @return The instance of the conveyor system.
+	 */
+	public static Conveyor getConveyor()
+	{
+		return carbonConveyor;
+	}
+	
+	/**
+	 * Returns the instance of the jaw system.
+	 * @return The instance of the jaw system.
+	 */
+	public static Jaw getJaw()
+	{
+		return carbonJaw;
+	}
 }
