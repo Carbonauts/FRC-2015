@@ -11,8 +11,22 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class DriveOnLineCommand extends Command
 {
+	/**
+	 * Default constructor.
+	 */
 	public DriveOnLineCommand()
 	{
+		super("DriveOnLineCommand");
+		requires(Robot.getDrive());
+	}
+	
+	/**
+	 * Constructor with timeout.
+	 * @param timeout The duration (in seconds) before the command "times out".
+	 */
+	public DriveOnLineCommand(double duration)
+	{
+		super("DriveOnLineCommand", duration);
 		requires(Robot.getDrive());
 	}
 	

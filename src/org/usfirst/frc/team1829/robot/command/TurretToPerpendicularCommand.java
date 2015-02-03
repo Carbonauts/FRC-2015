@@ -12,8 +12,22 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class TurretToPerpendicularCommand extends Command
 {
+	/**
+	 * Default constructor
+	 */
 	public TurretToPerpendicularCommand()
 	{
+		super("TurretToPerpendicularCommand");
+		requires(Robot.getTurret());
+	}
+	
+	/**
+	 * Constructor with timeout.
+	 * @param duration The time (in seconds) before this command "times out".
+	 */
+	public TurretToPerpendicularCommand(double duration)
+	{
+		super("TurretToPerpendicularCommand", duration);
 		requires(Robot.getTurret());
 	}
 	

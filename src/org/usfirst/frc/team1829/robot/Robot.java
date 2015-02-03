@@ -59,10 +59,30 @@ public class Robot extends IterativeRobot
 	 * The active UI element for the Robot.
 	 */
 	private static CarbonUI ui;
+	
+	/**
+	 * The active instance of the Drive system.
+	 */
 	private static Drive carbonDrive;
+	
+	/**
+	 * The active instance of the Turret system.
+	 */
 	private static Turret carbonTurret;
+	
+	/**
+	 * The active instance of the Elevator system.
+	 */
 	private static Elevator carbonElevator;
+	
+	/**
+	 * The active instance of the Conveyor system.
+	 */
 	private static Conveyor carbonConveyor;
+	
+	/**
+	 * The active instance of the Jaw system.
+	 */
 	private static Jaw carbonJaw;
 	
     /**

@@ -10,8 +10,12 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class ConveyorFeedStopCommand extends Command
 {
+	/**
+	 * Default constructor
+	 */
 	public ConveyorFeedStopCommand()
 	{
+		super("ConveyorFeedStopCommand");
 		requires(Robot.getConveyor());
 	}
 	
