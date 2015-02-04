@@ -12,8 +12,22 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class TurretToParallelCommand extends Command
 {
+	/**
+	 * Default constructor
+	 */
 	public TurretToParallelCommand()
 	{
+		super("TurretToParallelCommand");
+		requires(Robot.getTurret());
+	}
+	
+	/**
+	 * Constructor with timeout.
+	 * @param duration The time (in seconds) before this command "times out".
+	 */
+	public TurretToParallelCommand(double duration)
+	{
+		super("TurretToParallelCommand", duration);
 		requires(Robot.getTurret());
 	}
 	

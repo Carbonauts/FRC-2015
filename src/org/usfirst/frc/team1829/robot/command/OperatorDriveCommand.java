@@ -11,8 +11,12 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class OperatorDriveCommand extends Command
 {
+	/**
+	 * Default constructor
+	 */
 	public OperatorDriveCommand()
 	{
+		super("OperatorDriveCommand");
 		requires(Robot.getDrive());
 	}
 	

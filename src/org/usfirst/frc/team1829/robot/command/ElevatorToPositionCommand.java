@@ -16,8 +16,25 @@ public class ElevatorToPositionCommand extends Command
 {
 	private Elevator.Position targetPosition;
 	
+	/**
+	 * Default constructor.
+	 * @param position The target position for the elevator.
+	 */
 	public ElevatorToPositionCommand(Elevator.Position position)
 	{
+		super("ElevatorToPositionCommand");
+		requires(Robot.getElevator());
+		targetPosition = position;
+	}
+	
+	/**
+	 * Constructor with timeout.
+	 * @param position The target position for the elevator.
+	 * @param duration The time (in seconds) before the command "times out".
+	 */
+	public ElevatorToPositionCommand(Elevator.Position position, double duration)
+	{
+		super("ElevatorToPositionCommand", duration);
 		requires(Robot.getElevator());
 		targetPosition = position;
 	}

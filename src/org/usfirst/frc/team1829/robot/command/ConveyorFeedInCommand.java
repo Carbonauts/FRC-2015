@@ -11,8 +11,22 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class ConveyorFeedInCommand extends Command
 {
+	/**
+	 * Default constructor
+	 */
 	public ConveyorFeedInCommand()
 	{
+		super("ConveyorFeedInCommand");
+		requires(Robot.getConveyor());
+	}
+	
+	/**
+	 * Constructor with timeout.
+	 * @param duration The time (in seconds) before the command "times out".
+	 */
+	public ConveyorFeedInCommand(double duration)
+	{
+		super("Conveyor Command", duration);
 		requires(Robot.getConveyor());
 	}
 	

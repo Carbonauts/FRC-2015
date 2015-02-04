@@ -11,8 +11,22 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class JawOpenCommand extends Command
 {
+	/**
+	 * Default constructor
+	 */
 	public JawOpenCommand()
 	{
+		super("JawOpenCommand");
+		requires(Robot.getJaw());
+	}
+	
+	/**
+	 * Constructor with timeout.
+	 * @param duration The time (in seconds) before this command "times out".
+	 */
+	public JawOpenCommand(double duration)
+	{
+		super("JawOpenCommand", duration);
 		requires(Robot.getJaw());
 	}
 	
