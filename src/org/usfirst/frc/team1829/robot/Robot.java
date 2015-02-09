@@ -40,20 +40,25 @@ public class Robot extends IterativeRobot
 	public static final int TURRET_MOTOR = 0;
 	public static final int TURRET_ENCODER_A = 0;
 	public static final int TURRET_ENCODER_B = 0;
-	public static final int TURRET_LIMIT_LEFT = 0;
-	public static final int TURRET_LIMIT_RIGHT = 0;
+	public static final int TURRET_LIMIT_PARALLEL = 0;
+	public static final int TURRET_LIMIT_PERPENDICULAR = 0;
 	//Elevator PWMs
 	public static final int ELEVATOR_MOTOR = 0;
+	public static final int ELEVATOR_ENCODER_A = 0;
+	public static final int ELEVATOR_ENCODER_B = 0;
+	public static final boolean ELEVATOR_DIRECTION = false; //Inversion constant for elevator.
 	public static final int ELEVATOR_LIMIT_TOP = 0;
 	public static final int ELEVATOR_LIMIT_BOT = 0;
 	//Conveyor PWMs
 	public static final int CONVEYOR_MOTOR = 0;
 	public static final int CONVEYOR_ENCODER_A = 0;
 	public static final int CONVEYOR_ENCODER_B = 0;
+	public static final boolean CONVEYOR_DIRECTION = false; //Inversion constant for conveyor.
 	//Jaw PWMs
 	public static final int JAW_GRAB_MOTOR = 0;
 	public static final int JAW_FEED_MOTOR = 0;
-	public static final int JAW_LIMIT = 0;
+	public static final int JAW_LIMIT_RETRACT = 0;
+	public static final int JAW_LIMIT_ENCOUNTER = 0;
 	
 	/**
 	 * The active UI element for the Robot.
