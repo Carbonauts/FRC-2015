@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.ControlMode;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 /**
@@ -93,8 +92,6 @@ public class Drive extends Subsystem
 		driveTrain = new RobotDrive(motorFrontLeft, motorRearLeft, motorFrontRight, motorRearRight);
 		
 		defaultCommand = new OperatorDriveCommand();
-		
-		ultrasonic = new Ultrasonic(Robot.DRIVE_ULTRASONIC_A, Robot.DRIVE_ULTRASONIC_B);
 		accelerometer = new BuiltInAccelerometer();
 		gyro = new Gyro(Robot.DRIVE_GYRO);
 		
@@ -109,8 +106,6 @@ public class Drive extends Subsystem
 		
 		motorRearRight.changeControlMode(ControlMode.Speed);
 		motorRearRight.setPID(driveP, driveI, driveD);
-		
-		ultrasonic.setAutomaticMode(true); //Ensures that multiple ultrasonic sensors don't interfere
 		
 		//driveTrain.mecanumDrive_Cartesian(x, y, rotation, gyroAngle);
 	}
@@ -140,6 +135,7 @@ public class Drive extends Subsystem
 		 * be added to the 'x' value in the arcade
 		 * drive to influence rotation.
 		 */
+		return 0.0; //Temporary return statement to appease compiler
 	}
 	
 	public void stop()
