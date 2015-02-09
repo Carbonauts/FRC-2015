@@ -1,6 +1,7 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.subsystems.Turret;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -12,13 +13,16 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class TurretToPerpendicularCommand extends Command
 {
+	private boolean finished;
+	private Turret turret;
+	
 	/**
 	 * Default constructor
 	 */
 	public TurretToPerpendicularCommand()
 	{
 		super("TurretToPerpendicularCommand");
-		requires(Robot.getTurret());
+		requires(turret = Robot.getTurret());
 	}
 	
 	/**
@@ -28,25 +32,44 @@ public class TurretToPerpendicularCommand extends Command
 	public TurretToPerpendicularCommand(double duration)
 	{
 		super("TurretToPerpendicularCommand", duration);
-		requires(Robot.getTurret());
+		requires(turret = Robot.getTurret());
 	}
 	
 	@Override
 	protected void initialize() 
 	{
-		
+		finished = false;
+		if(turret != null)
+		{
+			if(turret.isPerpendicular())
+			{
+				turret.stop();
+				finished = true;
+			}
+		}
 	}
 
 	@Override
 	protected void execute() 
 	{
-		
+		if(turret != null)
+		{
+			if(turret.isPerpendicular())
+			{
+				turret.stop();
+				finished = true;
+			}
+			else
+			{
+				turret.turnPerpendicular();
+			}
+		}
 	}
 
 	@Override
 	protected boolean isFinished() 
 	{
-		return false;
+		return finished;
 	}
 
 	@Override
@@ -58,6 +81,6 @@ public class TurretToPerpendicularCommand extends Command
 	@Override
 	protected void interrupted() 
 	{
-		
+		turret.stop();
 	}
 }
