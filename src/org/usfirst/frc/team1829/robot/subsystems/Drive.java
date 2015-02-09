@@ -1,17 +1,14 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.command.OperatorDriveCommand;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.ControlMode;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Gyro;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
@@ -47,10 +44,16 @@ public class Drive extends Subsystem
 	private RobotDrive driveTrain;
 	
 	/**
-	 * Ultrasonic sensor.
-	 * TODO find out if we're using ultrasonic.
+	 * The default command for this subsystem.
 	 */
-	private Ultrasonic ultrasonic;
+	private OperatorDriveCommand defaultCommand;
+	
+	/**
+	 * Analog input to read a value from our
+	 * line-following device (an arduino
+	 * that outputs the analog value).
+	 */
+	private AnalogInput lineFollower;
 	
 	/**
 	 * RoboRio's on-board accelerometer.
@@ -89,6 +92,8 @@ public class Drive extends Subsystem
 		motorRearRight = new CANTalon(Robot.DRIVE_REAR_RIGHT);
 		driveTrain = new RobotDrive(motorFrontLeft, motorRearLeft, motorFrontRight, motorRearRight);
 		
+		defaultCommand = new OperatorDriveCommand();
+		
 		ultrasonic = new Ultrasonic(Robot.DRIVE_ULTRASONIC_A, Robot.DRIVE_ULTRASONIC_B);
 		accelerometer = new BuiltInAccelerometer();
 		gyro = new Gyro(Robot.DRIVE_GYRO);
@@ -119,7 +124,22 @@ public class Drive extends Subsystem
 	 */
 	protected void initDefaultCommand() 
 	{
-		//setDefaultCommand(new Command());
+		setDefaultCommand(defaultCommand);
+	}
+	
+	/**
+	 * Returns a modifier that represents the needed
+	 * rotation offset in order to follow a line.
+	 */
+	public double getLineFollowingFactor()
+	{
+		//TODO Add analog input reading + calculation.
+		/*
+		 * This method should convert the analog reading
+		 * into a range close to [-1,1], which would then
+		 * be added to the 'x' value in the arcade
+		 * drive to influence rotation.
+		 */
 	}
 	
 	public void stop()
