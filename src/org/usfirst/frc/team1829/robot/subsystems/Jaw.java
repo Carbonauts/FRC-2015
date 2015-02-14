@@ -2,6 +2,8 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 
+import com.team1829.library.LatchBoolean;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -40,6 +42,8 @@ public class Jaw extends Subsystem
 	 */
 	private DigitalInput encounterLimit;
 	
+	private LatchBoolean hitContainer;
+	
 	/**
 	 * Constructs the Jaw subsystem.
 	 */
@@ -49,11 +53,17 @@ public class Jaw extends Subsystem
 		feedMotor = new Talon(Robot.JAW_FEED_MOTOR);
 		retractLimit = new DigitalInput(Robot.JAW_LIMIT_RETRACT);
 		encounterLimit = new DigitalInput(Robot.JAW_LIMIT_ENCOUNTER);
+		hitContainer = new LatchBoolean();
 	}
 	
 	@Override
 	protected void initDefaultCommand() 
 	{
 		
+	}
+	
+	public boolean encounteredContainer()
+	{
+		return hitContainer.onTrue(encounterLimit.get());
 	}
 }
