@@ -3,6 +3,8 @@ package org.usfirst.frc.team1829.robot.command;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.subsystems.Turret;
 
+import com.team1829.library.CarbonDigitalInput;
+
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
@@ -33,7 +35,8 @@ public class TurretDiagnosticCommand extends Command
 	@Override
 	protected void execute() 
 	{
-		
+		System.out.println("[" + getName() + "] Parallel: " + turret.isParallel() + 
+						   ", Perpendicular: " + turret.isPerpendicular());
 	}
 
 	@Override

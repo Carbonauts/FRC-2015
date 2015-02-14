@@ -2,8 +2,7 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 
-import com.team1829.library.CarbonDigitalInput;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
@@ -31,7 +30,7 @@ public class Jaw extends Subsystem
 	 * Limit switch that triggers when the Jaw is in its
 	 * fully retracted position.
 	 */
-	private CarbonDigitalInput retractLimit;
+	private DigitalInput retractLimit;
 	
 	/**
 	 * Limit switch that triggers when the Jaw has
@@ -39,7 +38,7 @@ public class Jaw extends Subsystem
 	 * has driven the Jaw into contact with a
 	 * CONTAINER).
 	 */
-	private CarbonDigitalInput encounterLimit;
+	private DigitalInput encounterLimit;
 	
 	/**
 	 * Constructs the Jaw subsystem.
@@ -48,8 +47,8 @@ public class Jaw extends Subsystem
 	{
 		jawMotor = new Talon(Robot.JAW_GRAB_MOTOR);
 		feedMotor = new Talon(Robot.JAW_FEED_MOTOR);
-		retractLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_RETRACT);
-		encounterLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_ENCOUNTER);
+		retractLimit = new DigitalInput(Robot.JAW_LIMIT_RETRACT);
+		encounterLimit = new DigitalInput(Robot.JAW_LIMIT_ENCOUNTER);
 	}
 	
 	@Override

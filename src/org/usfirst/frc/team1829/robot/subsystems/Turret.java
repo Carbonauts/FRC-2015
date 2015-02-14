@@ -3,6 +3,7 @@ package org.usfirst.frc.team1829.robot.subsystems;
 import org.usfirst.frc.team1829.robot.Robot;
 
 import com.team1829.library.CarbonDigitalInput;
+
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
@@ -44,8 +45,8 @@ public class Turret extends Subsystem
 	public Turret()
 	{
 		turretMotor = new Talon(Robot.TURRET_MOTOR);
-		parallelLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PARALLEL);
-		perpendicularLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PERPENDICULAR);
+		parallelLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PARALLEL, false);
+		perpendicularLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PERPENDICULAR, false);
 	}
 	
 	@Override

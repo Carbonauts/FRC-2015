@@ -2,8 +2,7 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 
-import com.team1829.library.CarbonDigitalInput;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -61,13 +60,13 @@ public class Elevator extends Subsystem
 	 * Limit switch that triggers when the elevator is
 	 * at maximum height.
 	 */
-	private CarbonDigitalInput topLimit;
+	private DigitalInput topLimit;
 	
 	/**
 	 * Limit switch that triggers when the elevator is
 	 * at minimum height.
 	 */
-	private CarbonDigitalInput botLimit;
+	private DigitalInput botLimit;
 	
 	/**
 	 * PID Control loop for the elevator while in position mode.
@@ -118,8 +117,8 @@ public class Elevator extends Subsystem
 		elevatorEncoder = new Encoder(Robot.ELEVATOR_ENCODER_A, 
 									  Robot.ELEVATOR_ENCODER_B,
 									  Robot.ELEVATOR_DIRECTION);
-		topLimit = new CarbonDigitalInput(Robot.ELEVATOR_LIMIT_TOP, false);
-		botLimit = new CarbonDigitalInput(Robot.ELEVATOR_LIMIT_BOT, false);
+		topLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_TOP);
+		botLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_BOT);
 		
 		elevatorPositionAdapter = new ElevatorPIDAdapter(Mode.POSITION);
 		elevatorSpeedAdapter = new ElevatorPIDAdapter(Mode.SPEED);
@@ -231,6 +230,11 @@ public class Elevator extends Subsystem
 	{
 		setMode(Mode.POSITION);
 		elevatorPositionController.setSetpoint(getCoordinatesFor(position));
+	}
+	
+	public double getPosition()
+	{
+		return elevatorEncoder.getDistance();
 	}
 	
 	/**

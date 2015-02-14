@@ -33,7 +33,9 @@ public class ElevatorDiagnosticCommand extends Command
 	@Override
 	protected void execute() 
 	{
-		
+		System.out.println("[" + getName() + "] Top: " + elevator.isAtTop() + 
+						   ", Bottom: " + elevator.isAtBottom() + 
+						   ", Position: " + elevator.getPosition());
 	}
 
 	@Override

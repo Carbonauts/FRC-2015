@@ -80,5 +80,6 @@ public class ElevatorCalibrateCommand extends Command
 	protected void interrupted() 
 	{
 		elevator.stop();
+		finished = true;
 	}
 }

@@ -1,7 +1,11 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.subsystems.Drive;
 
+import com.team1829.library.CarbonUI;
+
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
@@ -11,26 +15,28 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class OperatorDriveCommand extends Command
 {
+	private Drive drive;
+	
 	/**
 	 * Default constructor
 	 */
 	public OperatorDriveCommand()
 	{
 		super("OperatorDriveCommand");
-		requires(Robot.getDrive());
+		requires(drive = Robot.getDrive());
 	}
 	
 	@Override
 	protected void initialize() 
 	{
-		
+		System.out.println(getName() + ".initialize();");
 	}
 
 	@Override
 	protected void execute() 
 	{
-		Robot.getDrive().driveArcade(Robot.getUI().getAxisData(Robot.UI_DRIVE_Y),
-									 Robot.getUI().getAxisData(Robot.UI_DRIVE_R));
+		drive.driveArcade(Robot.getUI().getAxisData(Robot.UI_DRIVE_Y), 
+						  Robot.getUI().getAxisData(Robot.UI_DRIVE_R));
 	}
 
 	@Override
@@ -42,12 +48,12 @@ public class OperatorDriveCommand extends Command
 	@Override
 	protected void end() 
 	{
-		Robot.getDrive().stop();
+		drive.stop();
 	}
 
 	@Override
 	protected void interrupted() 
 	{
-		Robot.getDrive().stop();
+		drive.stop();
 	}
 }

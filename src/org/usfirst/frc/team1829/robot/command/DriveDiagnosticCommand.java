@@ -27,13 +27,14 @@ public class DriveDiagnosticCommand extends Command
 	@Override
 	protected void initialize() 
 	{
+		System.out.println(getName() + " initialized!");
 		finished = false;
 	}
 
 	@Override
 	protected void execute() 
 	{
-		
+		System.out.println(drive.getFeedback());
 	}
 
 	@Override
@@ -45,12 +46,12 @@ public class DriveDiagnosticCommand extends Command
 	@Override
 	protected void end() 
 	{
-		
+		System.out.println(getName() + " ended!");
 	}
 
 	@Override
 	protected void interrupted() 
 	{
-		
+		System.out.println(getName() + " interrupted!");
 	}
 }

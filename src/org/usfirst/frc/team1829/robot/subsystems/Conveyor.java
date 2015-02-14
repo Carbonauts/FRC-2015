@@ -2,11 +2,9 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 
-import com.team1829.library.CarbonDigitalInput;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 /**
@@ -30,13 +28,13 @@ public class Conveyor extends Subsystem
 	 * Limit switch that triggers as a CONTAINER
 	 * moves from the Jaw feeder into the conveyor.
 	 */
-	private CarbonDigitalInput enterLimit;
+	private DigitalInput enterLimit;
 	
 	/**
 	 * Limit switch that triggers when a CONTAINER
 	 * reaches the far back of the conveyor.
 	 */
-	private CarbonDigitalInput fullLimit;
+	private DigitalInput fullLimit;
 	
 	/**
 	 * Default speed that the conveyor should move
