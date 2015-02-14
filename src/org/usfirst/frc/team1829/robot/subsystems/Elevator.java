@@ -2,8 +2,7 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 
-import com.team1829.library.CarbonDigitalInput;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -19,37 +18,37 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  */
 public class Elevator extends Subsystem
 {
-	/**
-	 * Enumeration that defines preset positions that the Elevator
-	 * may move to.
-	 * @author Nick Mosher, Team 1829 Carbonauts Captain
+	/*
+	 * These constants define preset encoder locations
+	 * of different scoring zones.
+	 * TODO Measure and input actual positions.
 	 */
-	public enum Position {
+	public static final int LEVEL1_POSITION = 0;
+	public static final int LEVEL2_POSITION = 0;
+	public static final int LEVEL3_POSITION = 0;
+	public static final int LEVEL4_POSITION = 0;
+	public static final int LEVEL5_POSITION = 0;
+	
+	public enum Mode
+	{
+		POSITION,
+		SPEED
+	}
+	
+	public enum Position
+	{
 		LEVEL1,
 		LEVEL2,
 		LEVEL3,
 		LEVEL4,
-		LEVEL5,
-		LEVEL6
+		LEVEL5
 	}
-	
-	/**
-	 * Custom class that acts as a middle-man between
-	 * the sensors, PID controllers, and the outputs.
-	 */
-	private ElevatorPIDAdapter elevatorAdapter;
-	
-	/**
-	 * The PID controller for the elevator that controls
-	 * the motor for vertical motion.
-	 */
-	private PIDController elevatorController;
 	
 	/**
 	 * The Talon motor controller that we use for this
 	 * subsystem.
 	 */
-	private Talon elevatorTalon;
+	private Talon elevatorMotor;
 	
 	/**
 	 * The encoder attached to the subsystem to provide
@@ -61,18 +60,52 @@ public class Elevator extends Subsystem
 	 * Limit switch that triggers when the elevator is
 	 * at maximum height.
 	 */
-	private CarbonDigitalInput topLimit;
+	private DigitalInput topLimit;
 	
 	/**
 	 * Limit switch that triggers when the elevator is
 	 * at minimum height.
 	 */
-	private CarbonDigitalInput botLimit;
+	private DigitalInput botLimit;
+	
+	/**
+	 * PID Control loop for the elevator while in position mode.
+	 */
+	private PIDController elevatorPositionController;
+	
+	/**
+	 * PID Control loop for the elevator while in speed mode.
+	 */
+	private PIDController elevatorSpeedController;
+	
+	/**
+	 * PID input/output adapter for the elevator
+	 * PIDController while in position mode.
+	 */
+	private ElevatorPIDAdapter elevatorPositionAdapter;
+	
+	/**
+	 * PID input/output adapter for the elevator
+	 * PIDController while in speed mode.
+	 */
+	private ElevatorPIDAdapter elevatorSpeedAdapter;
+	
+	/**
+	 * The mode that the elevator is operating in, either
+	 * Mode.SPEED or Mode.POSITION.
+	 */
+	private Mode elevatorMode = Mode.POSITION;
+	
+	private boolean pidEnabled = false; //TODO Flag to remember to enable PID at some point.
 	
 	//TODO add actual PID values.
-	private double elevatorP = 0;
-	private double elevatorI = 0;
-	private double elevatorD = 0;
+	private static double elevatorSpeedP = 0;
+	private static double elevatorSpeedI = 0;
+	private static double elevatorSpeedD = 0;
+	
+	private static double elevatorPositionP = 0;
+	private static double elevatorPositionI = 0;
+	private static double elevatorPositionD = 0;
 	
 	/**
 	 * Initializes the Elevator subsystem and sets
@@ -80,15 +113,29 @@ public class Elevator extends Subsystem
 	 */
 	public Elevator()
 	{
-		elevatorAdapter = new ElevatorPIDAdapter();
-		elevatorController = new PIDController(elevatorP, 
-											   elevatorI, 
-											   elevatorD, 
-											   elevatorAdapter, 
-											   elevatorAdapter);
-		elevatorTalon = new Talon(Robot.ELEVATOR_MOTOR);
-		topLimit = new CarbonDigitalInput(Robot.ELEVATOR_LIMIT_TOP);
-		botLimit = new CarbonDigitalInput(Robot.ELEVATOR_LIMIT_BOT);
+		elevatorMotor = new Talon(Robot.ELEVATOR_MOTOR);
+		elevatorEncoder = new Encoder(Robot.ELEVATOR_ENCODER_A, 
+									  Robot.ELEVATOR_ENCODER_B,
+									  Robot.ELEVATOR_DIRECTION);
+		topLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_TOP);
+		botLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_BOT);
+		
+		elevatorPositionAdapter = new ElevatorPIDAdapter(Mode.POSITION);
+		elevatorSpeedAdapter = new ElevatorPIDAdapter(Mode.SPEED);
+		elevatorPositionController = new PIDController(elevatorPositionP,
+													   elevatorPositionI,
+													   elevatorPositionD,
+													   elevatorPositionAdapter,
+													   elevatorPositionAdapter);
+		elevatorSpeedController = new PIDController(elevatorSpeedP,
+													elevatorSpeedI,
+													elevatorSpeedD,
+													elevatorSpeedAdapter,
+													elevatorSpeedAdapter);
+		
+		//Limits the max speed of the PID outputs (and therefore the motor speed).
+		elevatorPositionController.setOutputRange(-1.0, 1.0);
+		elevatorSpeedController.setOutputRange(-1.0, 1.0);
 	}
 	
 	@Override
@@ -98,92 +145,228 @@ public class Elevator extends Subsystem
 	}
 	
 	/**
-	 * Sets the PID constants for this subsystem.
-	 * @param p Proportional value
-	 * @param i Integral value
-	 * @param d Derivative value
+	 * Sets the mode that the elevator will operate in.
+	 * @param mode Position or Speed mode.
 	 */
-	public void setPID(double p, double i, double d)
+	public void setMode(Mode mode)
 	{
-		elevatorP = p;
-		elevatorI = i;
-		elevatorD = d;
+		/*
+		 * If the mode of the elevator is already
+		 * what this method call wants, then
+		 * ignore it.
+		 */
+		if(mode == elevatorMode)
+		{
+			return;
+		}
 		
-		elevatorController.setPID(elevatorP, elevatorI, elevatorD);
+		elevatorPositionController.reset();
+		elevatorSpeedController.reset();
+		
+		if(mode == Mode.POSITION)
+		{
+			elevatorPositionController.enable();
+		}
+		else if(mode == Mode.SPEED)
+		{
+			elevatorSpeedController.enable();
+		}
+		elevatorMode = mode;
 	}
 	
 	/**
-	 * Sets the elevatorPIDController's setpoint.
-	 * @param setpoint The new setpoint.
+	 * Gets the limit switch reading of the top limit
+	 * of the elevator.
+	 * @return True if the elevator is at the top,
+	 * false otherwise.
 	 */
-	public void setSetpoint(double setpoint)
+	public boolean isAtTop()
 	{
-		elevatorController.setSetpoint(setpoint);
+		return topLimit.get();
 	}
 	
 	/**
-	 * Returns the current P constant.
-	 * @return The current P constant.
+	 * Gets the limit switch reading of the bottom
+	 * limit of the elevator.
+	 * @return True if the elevator is at the bottom,
+	 * false otherwise.
 	 */
-	public double getP()
+	public boolean isAtBottom()
 	{
-		return elevatorP = elevatorController.getP();
+		return botLimit.get();
 	}
 	
 	/**
-	 * Returns the current I constant.
-	 * @return The current I constant.
+	 * Moves the subsystem up using speed-based PID.
 	 */
-	public double getI()
+	public void moveUp()
 	{
-		return elevatorI = elevatorController.getI();
+		moveAtSpeed(0.4); //TODO Replace with a speed unit
 	}
 	
 	/**
-	 * Returns the current D constant.
-	 * @return The current D constant.
+	 * Moves the subsystem down using speed-based PID.
 	 */
-	public double getD()
+	public void moveDown()
 	{
-		return elevatorD = elevatorController.getD();
+		moveAtSpeed(-0.4); //TODO Replace with a nice speed unit
 	}
 	
 	/**
-	 * Implements both PIDSource and PIDOutput in order to 
-	 * act as an interface to our PIDController.  Doing this
-	 * allows us to have exact control over the feedback we
-	 * give and the output we receive.
+	 * Moves the subsystem using speed-based PID.
+	 * @param speed
+	 */
+	public void moveAtSpeed(double speed)
+	{
+		setMode(Mode.SPEED);
+		elevatorSpeedController.setSetpoint(speed);
+	}
+	
+	/**
+	 * Sets the subsystem to move to the desired position.
+	 * @param position The target position.
+	 */
+	public void moveToPosition(Position position)
+	{
+		setMode(Mode.POSITION);
+		elevatorPositionController.setSetpoint(getCoordinatesFor(position));
+	}
+	
+	public double getPosition()
+	{
+		return elevatorEncoder.getDistance();
+	}
+	
+	/**
+	 * Turns off the PID control (so that the PID loops
+	 * do not continue to set motor outputs) and manually
+	 * sets the motor speed to 0.
+	 */
+	public void stop()
+	{
+		setPIDEnabled(false);
+		elevatorMotor.set(0.0);
+	}
+	
+	/**
+	 * Resets the encoder position value to 0.  This has
+	 * no effect on the rate measure
+	 */
+	public void resetPosition()
+	{
+		elevatorEncoder.reset();
+	}
+	
+	/**
+	 * Sets whether the elevator is currently controlled by PID.
+	 * @param enabled PID Enabled.
+	 */
+	public void setPIDEnabled(boolean enabled)
+	{
+		/*
+		 * If the subsystem PID setting is already at
+		 * whatever this method call is ordering, then
+		 * ignore it.
+		 */
+		if(pidEnabled == enabled)
+		{
+			return;
+		}
+		
+		/*
+		 * If we're disabling PID, we want to turn off
+		 * the PID controllers (which reset does), if
+		 * we're enabling PID, then we want to reset
+		 * them anyway because of any built-up error
+		 * processing they may have done.
+		 */
+		elevatorPositionController.reset();
+		elevatorSpeedController.reset();
+		
+		/*
+		 * Enable only the correct PID controller based
+		 * on what mode the subsystem is in.  We do not
+		 * need a case for disabled because the controllers
+		 * are reset in this method anyway, which includes
+		 * disabling them.
+		 */
+		if(enabled)
+		{
+			if(elevatorMode == Mode.POSITION)
+			{
+				elevatorPositionController.enable();
+			}
+			else if(elevatorMode == Mode.SPEED)
+			{
+				elevatorSpeedController.enable();
+			}
+		}
+		pidEnabled = enabled;
+	}
+	
+	/**
+	 * Returns encoder position units for a particular position.
+	 * @param position The position to retrieve units for.
+	 * @return Encoder position units for a particular position.
+	 */
+	public int getCoordinatesFor(Position position)
+	{
+		int returnIs = -1;
+		switch(position)
+		{
+		case LEVEL1:
+			returnIs = LEVEL1_POSITION;
+		case LEVEL2:
+			returnIs = LEVEL2_POSITION;
+		case LEVEL3:
+			returnIs = LEVEL3_POSITION;
+		case LEVEL4:
+			returnIs = LEVEL4_POSITION;
+		case LEVEL5:
+			returnIs = LEVEL5_POSITION;
+		}
+		return returnIs;
+	}
+	
+	/**
+	 * Acts as a middleman between the subsystem and the PIDController.
 	 * @author Nick Mosher, Team 1829 Carbonauts Captain
-	 *
 	 */
 	public class ElevatorPIDAdapter implements PIDSource, PIDOutput
 	{
-		public ElevatorPIDAdapter()
+		private Mode mode;
+		
+		public ElevatorPIDAdapter(Mode mode)
 		{
-			
+			this.mode = mode;
 		}
 		
 		/**
-		 * The output of the PID calculations.  This is where
-		 * we get the instructions to pass to a motor or
-		 * other output object.
+		 * Allows the PIDController to write to the motor ONLY IF:
+		 * 1) The PID is enabled.
+		 * 2) The PID MODE that this adapter serves is the currently enabled one.
 		 */
 		public void pidWrite(double output) 
 		{
-			//TODO Receive PID output here.
+			if(pidEnabled && mode == elevatorMode)
+			{
+				elevatorMotor.set(output);
+			}
 		}
 
-		/**
-		 * The feedback input for the PID calculations.  This
-		 * is where we pass sensor or other feedback data into
-		 * the controller so it has a reference of how close
-		 * it is to its goal.
-		 */
 		public double pidGet() 
 		{	
-			//TODO Send PID feedback here.
-			return 0;
+			double toReturn = 0.0;
+			
+			if(mode == Mode.POSITION)
+			{
+				toReturn = elevatorEncoder.getDistance();
+			}
+			else if(mode == Elevator.Mode.SPEED)
+			{
+				toReturn = elevatorEncoder.getRate();
+			}
+			return toReturn;
 		}
-		
 	}
 }

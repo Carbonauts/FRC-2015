@@ -2,10 +2,8 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
+import com.team1829.library.CarbonDigitalInput;
+
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
@@ -16,21 +14,39 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  */
 public class Turret extends Subsystem
 {
-	private TurretPIDAdapter turretAdapter;
-	private PIDController turretController;
+	/**
+	 * Motor for this subsystem.
+	 */
 	private Talon turretMotor;
-	private Encoder turretEncoder;
 	
-	private double turretP = 0;
-	private double turretI = 0;
-	private double turretD = 0;
+	/**
+	 * Limit switch that triggers when the turret
+	 * is aligned parallel to the drive train of
+	 * the robot.
+	 */
+	private CarbonDigitalInput parallelLimit;
 	
+	/**
+	 * Limit switch that triggers when the turret
+	 * is aligned perpendicularly to the drive train
+	 * of the robot.
+	 */
+	private CarbonDigitalInput perpendicularLimit;
+	
+	/**
+	 * The default speed that methods in this subsystem
+	 * cause the motor to turn at.
+	 */
+	private double cruiseSpeed = 0.6;
+	
+	/**
+	 * Default turret constructor.
+	 */
 	public Turret()
 	{
-		turretAdapter = new TurretPIDAdapter();
-		turretController = new PIDController(turretP, turretI, turretD, turretAdapter, turretAdapter);
 		turretMotor = new Talon(Robot.TURRET_MOTOR);
-		turretEncoder = new Encoder(Robot.TURRET_ENCODER_A, Robot.TURRET_ENCODER_B);
+		parallelLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PARALLEL, false);
+		perpendicularLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PERPENDICULAR, false);
 	}
 	
 	@Override
@@ -39,50 +55,88 @@ public class Turret extends Subsystem
 		
 	}
 	
-	public void setPID(double p, double i, double d)
+	/**
+	 * Returns true if the turret is already
+	 * fully turned in-line with the drive train.
+	 * @return
+	 */
+	public boolean isParallel()
 	{
-		turretP = p;
-		turretI = i;
-		turretD = d;
-		
-		turretController.setPID(turretP, turretI, turretD);
+		return parallelLimit.get();
 	}
 	
-	public void setSetpoint(double setpoint)
+	/**
+	 * Returns true if the turret is already
+	 * fully turned sideways at a T from the drive train.
+	 * @return
+	 */
+	public boolean isPerpendicular()
 	{
-		turretController.setSetpoint(setpoint);
+		return perpendicularLimit.get();
 	}
 	
-	public double getP()
+	/**
+	 * Sets the power for the turret motor.
+	 * @param power The power for the turret motor.
+	 */
+	public void setPower(double power)
 	{
-		return turretP = turretController.getP();
-	}
-	
-	public double getI()
-	{
-		return turretI = turretController.getI();
-	}
-	
-	public double getD()
-	{
-		return turretD = turretController.getD();
-	}
-	
-	public class TurretPIDAdapter implements PIDSource, PIDOutput
-	{
-		public TurretPIDAdapter()
+		if(power > 1.0)
 		{
-			
+			power = 1.0;
 		}
-
-		public void pidWrite(double output) 
+		else if(power < -1.0)
 		{
-			turretMotor.set(output);
+			power = -1.0;
 		}
-
-		public double pidGet() 
+		turretMotor.set(power);
+	}
+	
+	/**
+	 * Sets the motor to turn the direction that
+	 * puts the turret parallel to the drive train.
+	 */
+	public void turnParallel()
+	{
+		if(!isParallel())
+		{			
+			setPower(cruiseSpeed);
+		}
+	}
+	
+	/**
+	 * Sets the motor to turn the direction that
+	 * puts the turret perpendicular to the drive train.
+	 */
+	public void turnPerpendicular()
+	{
+		if(!isPerpendicular())
 		{
-			return 0;
+			setPower(-cruiseSpeed);			
 		}
+	}
+	
+	/**
+	 * Stops the turret motor.
+	 */
+	public void stop()
+	{
+		turretMotor.stopMotor();
+	}
+	
+	/**
+	 * Sets the default speed of this subsystem.
+	 */
+	public void setCruiseSpeed(double speed)
+	{
+		if(speed > 1.0)
+		{
+			speed = 1.0;
+		}
+		else if(speed < -1.0)
+		{
+			speed = -1.0;
+		}
+		cruiseSpeed = speed;
 	}
 }

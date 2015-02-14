@@ -1,25 +1,20 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.command.OperatorDriveCommand;
 
-import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.ControlMode;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Gyro;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 /**
  * Subsystem that maneuvers the robot around the field.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class Drive extends Subsystem
+public class Drive extends Subsystem implements Diagnosable
 {	
 	/**
 	 * Front-left drive motor as a Talon.
@@ -47,15 +42,11 @@ public class Drive extends Subsystem
 	private RobotDrive driveTrain;
 	
 	/**
-	 * Ultrasonic sensor.
-	 * TODO find out if we're using ultrasonic.
+	 * Analog input to read a value from our
+	 * line-following device (an arduino
+	 * that outputs the analog value).
 	 */
-	private Ultrasonic ultrasonic;
-	
-	/**
-	 * RoboRio's on-board accelerometer.
-	 */
-	private BuiltInAccelerometer accelerometer;
+	private AnalogInput lineFollower;
 	
 	/**
 	 * Drive gyro.
@@ -66,7 +57,7 @@ public class Drive extends Subsystem
 	/**
 	 * Proportional value for the drive motors.
 	 */
-	private double driveP = 0;
+	private double driveP = 5;
 	
 	/**
 	 * Integral value for the drive motors.
@@ -79,6 +70,11 @@ public class Drive extends Subsystem
 	private double driveD = 0;
 	
 	/**
+	 * The last operation the drive subsystem did.
+	 */
+	private String lastOperation;
+	
+	/**
 	 * Setup the Drive system.
 	 */
 	public Drive() 
@@ -87,27 +83,13 @@ public class Drive extends Subsystem
 		motorRearLeft = new CANTalon(Robot.DRIVE_REAR_LEFT);
 		motorFrontRight = new CANTalon(Robot.DRIVE_FRONT_RIGHT);
 		motorRearRight = new CANTalon(Robot.DRIVE_REAR_RIGHT);
+		
+		setDriveMode(CANTalon.ControlMode.PercentVbus);
+		setPID(driveP, driveI, driveD);
+
 		driveTrain = new RobotDrive(motorFrontLeft, motorRearLeft, motorFrontRight, motorRearRight);
 		
-		ultrasonic = new Ultrasonic(Robot.DRIVE_ULTRASONIC_A, Robot.DRIVE_ULTRASONIC_B);
-		accelerometer = new BuiltInAccelerometer();
 		gyro = new Gyro(Robot.DRIVE_GYRO);
-		
-		motorFrontLeft.changeControlMode(ControlMode.Speed);
-		motorFrontLeft.setPID(driveP, driveI, driveD);
-		
-		motorRearLeft.changeControlMode(ControlMode.Speed);
-		motorRearLeft.setPID(driveP, driveI, driveD);
-		
-		motorFrontRight.changeControlMode(ControlMode.Speed);
-		motorFrontRight.setPID(driveP, driveI, driveD);
-		
-		motorRearRight.changeControlMode(ControlMode.Speed);
-		motorRearRight.setPID(driveP, driveI, driveD);
-		
-		ultrasonic.setAutomaticMode(true); //Ensures that multiple ultrasonic sensors don't interfere
-		
-		//driveTrain.mecanumDrive_Cartesian(x, y, rotation, gyroAngle);
 	}
 	
 	/**
@@ -119,7 +101,16 @@ public class Drive extends Subsystem
 	 */
 	protected void initDefaultCommand() 
 	{
-		//setDefaultCommand(new Command());
+		setDefaultCommand(new OperatorDriveCommand());
+	}
+	
+	/**
+	 * Returns the value retrieved from the off-board
+	 * line following calculator.
+	 */
+	public int getLineFollowingFactor()
+	{
+		return lineFollower.getValue();
 	}
 	
 	public void stop()
@@ -130,5 +121,36 @@ public class Drive extends Subsystem
 	public void driveArcade(double y, double x)
 	{
 		driveTrain.arcadeDrive(y, x);
+	}
+	
+	public void setPID(double p, double i, double d)
+	{
+		motorFrontLeft.setPID(p, i, d);
+		motorRearLeft.setPID(p, i, d);
+		motorFrontRight.setPID(p, i, d);
+		motorRearRight.setPID(p, i, d);
+	}
+	
+	public void setDriveMode(CANTalon.ControlMode mode)
+	{
+		motorFrontLeft.changeControlMode(mode);
+		motorRearLeft.changeControlMode(mode);
+		motorFrontRight.changeControlMode(mode);
+		motorRearRight.changeControlMode(mode);
+	}
+
+	public String getFeedback() 
+	{	
+		StringBuffer encoderReadings = new StringBuffer("[" + getName() + "] EncoderPos:");
+		encoderReadings.append(" (FL-").append(motorFrontLeft.getEncPosition());
+		encoderReadings.append(") (FR-").append(motorFrontRight.getEncPosition());
+		encoderReadings.append(") (RL-").append(motorRearLeft.getEncPosition());
+		encoderReadings.append(") (RR-").append(motorRearRight.getEncPosition()).append(")");
+		return encoderReadings.toString();
+	}
+
+	public String lastOperation() 
+	{	
+		return lastOperation;
 	}
 }

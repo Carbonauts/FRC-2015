@@ -3,57 +3,55 @@ package org.usfirst.frc.team1829.robot.command;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.subsystems.Drive;
 
-import com.team1829.library.CarbonUI;
-
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
- * Grants control of the drive system to the drivers.
- * This should be the default command of the Drive subsystem.
+ * Command to test the subsystem, such as taking sensor
+ * readings or calibrating PID.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class OperatorDriveCommand extends Command
+public class DriveDiagnosticCommand extends Command
 {
 	private Drive drive;
+	private boolean finished;
 	
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 */
-	public OperatorDriveCommand()
+	public DriveDiagnosticCommand()
 	{
-		super("OperatorDriveCommand");
+		super("DriveDiagnosticCommand");
 		requires(drive = Robot.getDrive());
 	}
-	
+
 	@Override
 	protected void initialize() 
 	{
-		System.out.println(getName() + ".initialize();");
+		System.out.println(getName() + " initialized!");
+		finished = false;
 	}
 
 	@Override
 	protected void execute() 
 	{
-		drive.driveArcade(Robot.getUI().getAxisData(Robot.UI_DRIVE_Y), 
-						  Robot.getUI().getAxisData(Robot.UI_DRIVE_R));
+		System.out.println(drive.getFeedback());
 	}
 
 	@Override
 	protected boolean isFinished() 
-	{
-		return false;
+	{	
+		return finished;
 	}
 
 	@Override
 	protected void end() 
 	{
-		drive.stop();
+		System.out.println(getName() + " ended!");
 	}
 
 	@Override
 	protected void interrupted() 
 	{
-		drive.stop();
+		System.out.println(getName() + " interrupted!");
 	}
 }
