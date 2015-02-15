@@ -10,6 +10,7 @@ import org.usfirst.frc.team1829.robot.subsystems.Turret;
 import com.team1829.library.CarbonUI;
 import com.team1829.library.CarbonUI.ControlType;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -123,13 +124,16 @@ public class Robot extends IterativeRobot
         Scheduler.getInstance().run();
     }
 
+    Encoder temporaryEncoder = new Encoder(0,1);
+    
     /**
      * This function is called at the beginning of teleop.
      */
     public void teleopInit() 
     {
     	System.out.println("Robot.teleopInit();");
-    	Scheduler.getInstance().add(new DriveDiagnosticCommand());
+    	//Scheduler.getInstance().add(new DriveDiagnosticCommand());
+    	temporaryEncoder.setDistancePerPulse((42.0/(100.0 * 50.0)) * (4.0 * 3.14));
     }
 
     /**
@@ -138,6 +142,7 @@ public class Robot extends IterativeRobot
     public void teleopPeriodic() 
     {
         Scheduler.getInstance().run();
+        System.out.println("Encoder:" + temporaryEncoder.getDistance());
     }
     
     /**
