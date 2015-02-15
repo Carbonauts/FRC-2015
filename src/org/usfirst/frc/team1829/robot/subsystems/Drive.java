@@ -108,9 +108,10 @@ public class Drive extends Subsystem implements Diagnosable
 	 * Returns the value retrieved from the off-board
 	 * line following calculator.
 	 */
-	public int getLineFollowingFactor()
+	public double getLineFollowingFactor()
 	{
-		return lineFollower.getValue();
+		//lineFollower.getValue() returns an integer between 0 and 2^12
+		return lineFollower.getValue()*2/(2^12) - 1;		//scale input to between -1 and 1
 	}
 	
 	public void stop()
