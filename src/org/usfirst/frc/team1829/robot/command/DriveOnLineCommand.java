@@ -22,9 +22,10 @@ public class DriveOnLineCommand extends Command
 	private Jaw jaw;
 	private PIDController rotationController;
 	private RotationPIDAdapter rotationAdapter;
-	private double rotationP = 0;
+	private double rotationP = 0.1;
 	private double rotationI = 0;
 	private double rotationD = 0;
+	private double latestOutput = 0;
 	private boolean finished;
 	
 	/**
@@ -66,6 +67,7 @@ public class DriveOnLineCommand extends Command
 	protected void execute() 
 	{
 		//if(jaw.encounteredContainer()) {}  //Stop when we hit a new container
+		drive.driveArcade(0, latestOutput);
 	}
 
 	@Override
@@ -88,14 +90,18 @@ public class DriveOnLineCommand extends Command
 	
 	public class RotationPIDAdapter implements PIDSource, PIDOutput
 	{
+		public void pidUpdate()
+		{
+			pidWrite(pidGet());
+		}
 		public void pidWrite(double output) 
 		{
-			//Output of PID loop
+			latestOutput = output;
 		}
 
 		public double pidGet() 
 		{	
-			return 0; //Return feedback aka line sensor.
+			return drive.getLineFollowingFactor();
 		}
 	}
 }
