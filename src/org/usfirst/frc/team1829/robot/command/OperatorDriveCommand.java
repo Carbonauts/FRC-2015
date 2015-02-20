@@ -3,9 +3,6 @@ package org.usfirst.frc.team1829.robot.command;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.subsystems.Drive;
 
-import com.team1829.library.CarbonUI;
-
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**

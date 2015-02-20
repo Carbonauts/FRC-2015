@@ -1,19 +1,25 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
+import java.text.DecimalFormat;
+
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonDigitalInput;
 
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Subsystem that rotates the entire upper structure of
  * the robot to face the row of CONTAINERS on the step.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class Turret extends Subsystem
+public class Turret extends Subsystem implements Diagnosable
 {
+	DecimalFormat formatter = new DecimalFormat("000.00");
+	
 	/**
 	 * Motor for this subsystem.
 	 */
@@ -39,14 +45,19 @@ public class Turret extends Subsystem
 	 */
 	private double cruiseSpeed = 0.6;
 	
+	private String lastOperation = "";
+	
 	/**
 	 * Default turret constructor.
 	 */
 	public Turret()
 	{
+		super("Turret");
 		turretMotor = new Talon(Robot.TURRET_MOTOR);
 		parallelLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PARALLEL, false);
 		perpendicularLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PERPENDICULAR, false);
+		
+		lastOperation = "Turret() constructed";
 	}
 	
 	@Override
@@ -62,7 +73,7 @@ public class Turret extends Subsystem
 	 */
 	public boolean isParallel()
 	{
-		return parallelLimit.get();
+		return !parallelLimit.get();
 	}
 	
 	/**
@@ -72,7 +83,7 @@ public class Turret extends Subsystem
 	 */
 	public boolean isPerpendicular()
 	{
-		return perpendicularLimit.get();
+		return !perpendicularLimit.get();
 	}
 	
 	/**
@@ -90,6 +101,7 @@ public class Turret extends Subsystem
 			power = -1.0;
 		}
 		turretMotor.set(power);
+		lastOperation = "setPower(" + formatter.format(power) + ")";
 	}
 	
 	/**
@@ -102,6 +114,7 @@ public class Turret extends Subsystem
 		{			
 			setPower(cruiseSpeed);
 		}
+		lastOperation = "turnParallel()";
 	}
 	
 	/**
@@ -114,6 +127,7 @@ public class Turret extends Subsystem
 		{
 			setPower(-cruiseSpeed);			
 		}
+		lastOperation = "turnPerpendicular()";
 	}
 	
 	/**
@@ -122,6 +136,7 @@ public class Turret extends Subsystem
 	public void stop()
 	{
 		turretMotor.stopMotor();
+		lastOperation = "stop()";
 	}
 	
 	/**
@@ -138,5 +153,26 @@ public class Turret extends Subsystem
 			speed = -1.0;
 		}
 		cruiseSpeed = speed;
+		lastOperation = "setCruiseSpeed(" + formatter.format(speed) + ")";
+	}
+
+	public String getFeedback() 
+	{	
+		StringBuffer feedback = new StringBuffer("");
+		feedback.append("[" + getName() + "] ParaLimit:").append(isParallel() ? "T" : "F");
+		feedback.append(" PerpLimit:").append(isPerpendicular() ? "T" : "F");
+		return feedback.toString();
+	}
+	
+	public void updateSmartDS()
+	{
+		SmartDashboard.putBoolean("Turret Parallel Lmiit", isParallel());
+		SmartDashboard.putBoolean("Turret Perpendicular Limit", isPerpendicular());
+		SmartDashboard.putString("Turret Last Operation", lastOperation());
+	}
+
+	public String lastOperation() 
+	{	
+		return lastOperation;
 	}
 }
