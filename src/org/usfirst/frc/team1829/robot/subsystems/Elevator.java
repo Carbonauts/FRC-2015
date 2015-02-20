@@ -1,14 +1,19 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
+import java.text.DecimalFormat;
+
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.util.Diagnosable;
+
+import com.team1829.library.CarbonAnalogInput;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Subsystem that controls the vertical movement of the
@@ -16,27 +21,25 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  * PID control system to allow smooth movement.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class Elevator extends Subsystem
+public class Elevator extends Subsystem implements Diagnosable
 {
+	DecimalFormat formatter = new DecimalFormat("000.00");
+	
 	/*
-	 * These constants define preset encoder locations
+	 * These constants define preset ultrasonic locations
 	 * of different scoring zones.
 	 * TODO Measure and input actual positions.
 	 */
+	public static final int AUTO_POSITION = 0;
 	public static final int LEVEL1_POSITION = 0;
 	public static final int LEVEL2_POSITION = 0;
 	public static final int LEVEL3_POSITION = 0;
 	public static final int LEVEL4_POSITION = 0;
 	public static final int LEVEL5_POSITION = 0;
 	
-	public enum Mode
-	{
-		POSITION,
-		SPEED
-	}
-	
 	public enum Position
 	{
+		AUTO,
 		LEVEL1,
 		LEVEL2,
 		LEVEL3,
@@ -48,13 +51,13 @@ public class Elevator extends Subsystem
 	 * The Talon motor controller that we use for this
 	 * subsystem.
 	 */
-	private Talon elevatorMotor;
+	private Talon motor;
 	
 	/**
-	 * The encoder attached to the subsystem to provide
+	 * The ultrasoinc attached to the subsystem to provide
 	 * feedback for the PID controller.
 	 */
-	private Encoder elevatorEncoder;
+	private CarbonAnalogInput ultrasonic;
 	
 	/**
 	 * Limit switch that triggers when the elevator is
@@ -71,41 +74,22 @@ public class Elevator extends Subsystem
 	/**
 	 * PID Control loop for the elevator while in position mode.
 	 */
-	private PIDController elevatorPositionController;
-	
-	/**
-	 * PID Control loop for the elevator while in speed mode.
-	 */
-	private PIDController elevatorSpeedController;
+	private PIDController pidController;
 	
 	/**
 	 * PID input/output adapter for the elevator
 	 * PIDController while in position mode.
 	 */
-	private ElevatorPIDAdapter elevatorPositionAdapter;
+	private ElevatorPIDAdapter pidAdapter;
 	
-	/**
-	 * PID input/output adapter for the elevator
-	 * PIDController while in speed mode.
-	 */
-	private ElevatorPIDAdapter elevatorSpeedAdapter;
-	
-	/**
-	 * The mode that the elevator is operating in, either
-	 * Mode.SPEED or Mode.POSITION.
-	 */
-	private Mode elevatorMode = Mode.POSITION;
+	private String lastOperation = "";
 	
 	private boolean pidEnabled = false; //TODO Flag to remember to enable PID at some point.
 	
 	//TODO add actual PID values.
-	private static double elevatorSpeedP = 0;
-	private static double elevatorSpeedI = 0;
-	private static double elevatorSpeedD = 0;
-	
-	private static double elevatorPositionP = 0;
-	private static double elevatorPositionI = 0;
-	private static double elevatorPositionD = 0;
+	private static double elevatorP = 1.0/800.0;
+	private static double elevatorI = 0;
+	private static double elevatorD = 0;
 	
 	/**
 	 * Initializes the Elevator subsystem and sets
@@ -113,65 +97,30 @@ public class Elevator extends Subsystem
 	 */
 	public Elevator()
 	{
-		elevatorMotor = new Talon(Robot.ELEVATOR_MOTOR);
-		elevatorEncoder = new Encoder(Robot.ELEVATOR_ENCODER_A, 
-									  Robot.ELEVATOR_ENCODER_B,
-									  Robot.ELEVATOR_DIRECTION);
+		super("Elevator");
+		
+		motor = new Talon(Robot.ELEVATOR_MOTOR);
+		ultrasonic = new CarbonAnalogInput(Robot.ELEVATOR_ULTRA, CarbonAnalogInput.SmoothingMode.AVERAGE, 8, 20);
 		topLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_TOP);
 		botLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_BOT);
 		
-		elevatorPositionAdapter = new ElevatorPIDAdapter(Mode.POSITION);
-		elevatorSpeedAdapter = new ElevatorPIDAdapter(Mode.SPEED);
-		elevatorPositionController = new PIDController(elevatorPositionP,
-													   elevatorPositionI,
-													   elevatorPositionD,
-													   elevatorPositionAdapter,
-													   elevatorPositionAdapter);
-		elevatorSpeedController = new PIDController(elevatorSpeedP,
-													elevatorSpeedI,
-													elevatorSpeedD,
-													elevatorSpeedAdapter,
-													elevatorSpeedAdapter);
+		pidAdapter = new ElevatorPIDAdapter();
+		pidController = new PIDController(elevatorP,
+										  elevatorI,
+										  elevatorD,
+										  pidAdapter,
+										  pidAdapter);
 		
 		//Limits the max speed of the PID outputs (and therefore the motor speed).
-		elevatorPositionController.setOutputRange(-1.0, 1.0);
-		elevatorSpeedController.setOutputRange(-1.0, 1.0);
+		pidController.setOutputRange(-0.5, 0.5);
+		
+		lastOperation = "Elevator() constructed";
 	}
 	
 	@Override
 	protected void initDefaultCommand() 
 	{
 		//TODO Initialize a default command for this subsystem.
-	}
-	
-	/**
-	 * Sets the mode that the elevator will operate in.
-	 * @param mode Position or Speed mode.
-	 */
-	public void setMode(Mode mode)
-	{
-		/*
-		 * If the mode of the elevator is already
-		 * what this method call wants, then
-		 * ignore it.
-		 */
-		if(mode == elevatorMode)
-		{
-			return;
-		}
-		
-		elevatorPositionController.reset();
-		elevatorSpeedController.reset();
-		
-		if(mode == Mode.POSITION)
-		{
-			elevatorPositionController.enable();
-		}
-		else if(mode == Mode.SPEED)
-		{
-			elevatorSpeedController.enable();
-		}
-		elevatorMode = mode;
 	}
 	
 	/**
@@ -182,7 +131,7 @@ public class Elevator extends Subsystem
 	 */
 	public boolean isAtTop()
 	{
-		return topLimit.get();
+		return !topLimit.get();
 	}
 	
 	/**
@@ -193,33 +142,7 @@ public class Elevator extends Subsystem
 	 */
 	public boolean isAtBottom()
 	{
-		return botLimit.get();
-	}
-	
-	/**
-	 * Moves the subsystem up using speed-based PID.
-	 */
-	public void moveUp()
-	{
-		moveAtSpeed(0.4); //TODO Replace with a speed unit
-	}
-	
-	/**
-	 * Moves the subsystem down using speed-based PID.
-	 */
-	public void moveDown()
-	{
-		moveAtSpeed(-0.4); //TODO Replace with a nice speed unit
-	}
-	
-	/**
-	 * Moves the subsystem using speed-based PID.
-	 * @param speed
-	 */
-	public void moveAtSpeed(double speed)
-	{
-		setMode(Mode.SPEED);
-		elevatorSpeedController.setSetpoint(speed);
+		return !botLimit.get();
 	}
 	
 	/**
@@ -228,13 +151,58 @@ public class Elevator extends Subsystem
 	 */
 	public void moveToPosition(Position position)
 	{
-		setMode(Mode.POSITION);
-		elevatorPositionController.setSetpoint(getCoordinatesFor(position));
+		setSetpoint(getCoordinatesFor(position));
+		lastOperation = "moveToPosition(" + position.toString() + ")";
 	}
 	
+	/**
+	 * Set the setpoint for the elevator's PID Controller
+	 * @param setpoint
+	 */
+	public void setSetpoint(double setpoint)
+	{
+		pidController.setSetpoint(setpoint);
+		lastOperation = "setSetpoint(" + setpoint + ")";
+	}
+	
+	/**
+	 * Returns the current setpoint of the internal PID Controller
+	 * @return
+	 */
+	public double getSetpoint()
+	{
+		return pidController.getSetpoint();
+	}
+	
+	/**
+	 * Returns the distance data from the ultrasonic sensor.
+	 * @return Distance data.
+	 */
 	public double getPosition()
 	{
-		return elevatorEncoder.getDistance();
+		return ultrasonic.getAverageSmoothedValue();
+	}
+	
+	/**
+	 * Sets the motor power with no PID calculations.
+	 * @param power
+	 */
+	public void setAbsolutePower(double power)
+	{
+		setPIDEnabled(false);
+		
+		if(power > 0 && !isAtTop())
+		{
+			motor.set(-power);
+		}
+		else if(power < 0 && !isAtBottom())
+		{
+			motor.set(-power);
+		}
+		else
+		{
+			motor.stopMotor();
+		}
 	}
 	
 	/**
@@ -245,16 +213,8 @@ public class Elevator extends Subsystem
 	public void stop()
 	{
 		setPIDEnabled(false);
-		elevatorMotor.set(0.0);
-	}
-	
-	/**
-	 * Resets the encoder position value to 0.  This has
-	 * no effect on the rate measure
-	 */
-	public void resetPosition()
-	{
-		elevatorEncoder.reset();
+		motor.stopMotor();
+		lastOperation = "stop()";
 	}
 	
 	/**
@@ -272,36 +232,14 @@ public class Elevator extends Subsystem
 		{
 			return;
 		}
-		
-		/*
-		 * If we're disabling PID, we want to turn off
-		 * the PID controllers (which reset does), if
-		 * we're enabling PID, then we want to reset
-		 * them anyway because of any built-up error
-		 * processing they may have done.
-		 */
-		elevatorPositionController.reset();
-		elevatorSpeedController.reset();
-		
-		/*
-		 * Enable only the correct PID controller based
-		 * on what mode the subsystem is in.  We do not
-		 * need a case for disabled because the controllers
-		 * are reset in this method anyway, which includes
-		 * disabling them.
-		 */
-		if(enabled)
+
+		pidController.reset();
+		pidEnabled = enabled;		
+		if(pidEnabled)
 		{
-			if(elevatorMode == Mode.POSITION)
-			{
-				elevatorPositionController.enable();
-			}
-			else if(elevatorMode == Mode.SPEED)
-			{
-				elevatorSpeedController.enable();
-			}
+			pidController.enable();
 		}
-		pidEnabled = enabled;
+		lastOperation = "setPIDEnabled(" + enabled + ")";
 	}
 	
 	/**
@@ -311,21 +249,25 @@ public class Elevator extends Subsystem
 	 */
 	public int getCoordinatesFor(Position position)
 	{
-		int returnIs = -1;
+		int toReturn = -1;
 		switch(position)
 		{
+		case AUTO:
+			toReturn = AUTO_POSITION;
 		case LEVEL1:
-			returnIs = LEVEL1_POSITION;
+			toReturn = LEVEL1_POSITION;
 		case LEVEL2:
-			returnIs = LEVEL2_POSITION;
+			toReturn = LEVEL2_POSITION;
 		case LEVEL3:
-			returnIs = LEVEL3_POSITION;
+			toReturn = LEVEL3_POSITION;
 		case LEVEL4:
-			returnIs = LEVEL4_POSITION;
+			toReturn = LEVEL4_POSITION;
 		case LEVEL5:
-			returnIs = LEVEL5_POSITION;
+			toReturn = LEVEL5_POSITION;
+		default:
+			break;
 		}
-		return returnIs;
+		return toReturn;
 	}
 	
 	/**
@@ -334,39 +276,74 @@ public class Elevator extends Subsystem
 	 */
 	public class ElevatorPIDAdapter implements PIDSource, PIDOutput
 	{
-		private Mode mode;
-		
-		public ElevatorPIDAdapter(Mode mode)
-		{
-			this.mode = mode;
-		}
-		
 		/**
-		 * Allows the PIDController to write to the motor ONLY IF:
-		 * 1) The PID is enabled.
-		 * 2) The PID MODE that this adapter serves is the currently enabled one.
+		 * Receive the output from the PID loop.
 		 */
 		public void pidWrite(double output) 
 		{
-			if(pidEnabled && mode == elevatorMode)
+			if(pidEnabled)
 			{
-				elevatorMotor.set(output);
+				if(output > 0 && !isAtTop())
+				{
+					motor.set(-output);
+				}
+				else if (output < 0 && !isAtBottom())
+				{
+					motor.set(-output);
+				}
+				else
+				{
+					motor.stopMotor();
+				}
 			}
 		}
 
+		/**
+		 * Send sensor feedback to the PID loop.
+		 */
 		public double pidGet() 
 		{	
-			double toReturn = 0.0;
-			
-			if(mode == Mode.POSITION)
-			{
-				toReturn = elevatorEncoder.getDistance();
-			}
-			else if(mode == Elevator.Mode.SPEED)
-			{
-				toReturn = elevatorEncoder.getRate();
-			}
-			return toReturn;
+			return getPosition();
 		}
+	}
+
+	/**
+	 * Returns a string representation of the status of this
+	 * subsystem.
+	 */
+	public String getFeedback() 
+	{	
+		StringBuffer feedback = new StringBuffer("");
+		feedback.append("[" + getName() + "]");
+		DecimalFormat ultraFormat = new DecimalFormat("0000.00");
+		feedback.append(" Ultra-Smoothed:").append(ultraFormat.format(ultrasonic.getAverageSmoothedValue()));
+		feedback.append(" Ultra-Raw:").append(ultraFormat.format(ultrasonic.getRawValue()));
+		feedback.append(" TopLimit:").append(isAtTop() ? "T" : "F");
+		feedback.append(" BotLimit:").append(isAtBottom() ? "T" : "F");
+		return feedback.toString();
+	}
+	
+	/**
+	 * Updates the smartdashboard with data from the status
+	 * of this subsystem.
+	 */
+	public void updateSmartDS()
+	{
+		SmartDashboard.putNumber("Elevator Ultrasonic Graph", ultrasonic.getRawValue());
+		SmartDashboard.putNumber("Elevator Ultrasonic", ultrasonic.getRawValue());
+		SmartDashboard.putNumber("Elevator Ultrasonic Smoothed Graph", ultrasonic.getAverageSmoothedValue());
+		SmartDashboard.putNumber("Elevator Ultrasonic Smoothed", ultrasonic.getAverageSmoothedValue());
+		SmartDashboard.putBoolean("Elevator Top Limit", isAtTop());
+		SmartDashboard.putBoolean("Elevator Bottom Limit", isAtBottom());
+		SmartDashboard.putString("Elevator Last Operation", lastOperation());
+	}
+
+	/**
+	 * Returns a string representation of the last major
+	 * operation this subsystem did.
+	 */
+	public String lastOperation() 
+	{	
+		return lastOperation;
 	}
 }

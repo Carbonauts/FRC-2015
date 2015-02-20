@@ -2,9 +2,7 @@ package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.subsystems.Drive;
-import org.usfirst.frc.team1829.robot.subsystems.Jaw;
-
-import com.team1829.library.LatchBoolean;
+//import org.usfirst.frc.team1829.robot.subsystems.Jaw;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
@@ -19,10 +17,11 @@ import edu.wpi.first.wpilibj.command.Command;
 public class DriveOnLineCommand extends Command
 {
 	private Drive drive;
-	private Jaw jaw;
+	//private Jaw jaw;
 	private PIDController rotationController;
 	private RotationPIDAdapter rotationAdapter;
-	private double rotationP = 0.1;
+	
+	private double rotationP = 1.0/2000.0;
 	private double rotationI = 0;
 	private double rotationD = 0;
 	private double latestOutput = 0;
@@ -35,7 +34,7 @@ public class DriveOnLineCommand extends Command
 	{
 		super("DriveOnLineCommand");
 		requires(drive = Robot.getDrive());
-		jaw = Robot.getJaw();
+		//jaw = Robot.getJaw();
 		
 		rotationAdapter = new RotationPIDAdapter();
 		rotationController = new PIDController(rotationP, rotationI, rotationD, rotationAdapter, rotationAdapter);
@@ -49,7 +48,7 @@ public class DriveOnLineCommand extends Command
 	{
 		super("DriveOnLineCommand", duration);
 		requires(drive = Robot.getDrive());
-		jaw = Robot.getJaw();
+		//jaw = Robot.getJaw();
 		
 		rotationAdapter = new RotationPIDAdapter();
 		rotationController = new PIDController(rotationP, rotationI, rotationD, rotationAdapter, rotationAdapter);
@@ -59,6 +58,9 @@ public class DriveOnLineCommand extends Command
 	protected void initialize() 
 	{
 		finished = false;
+		rotationController.setSetpoint(drive.getLineFollowingFactor());
+		System.out.println("Setpoint:" + rotationController.getSetpoint());
+		
 		rotationController.reset();
 		rotationController.enable();
 	}
@@ -68,6 +70,7 @@ public class DriveOnLineCommand extends Command
 	{
 		//if(jaw.encounteredContainer()) {}  //Stop when we hit a new container
 		drive.driveArcade(0, latestOutput);
+		System.out.println("LatestOutput:" + latestOutput);
 	}
 
 	@Override
@@ -90,10 +93,6 @@ public class DriveOnLineCommand extends Command
 	
 	public class RotationPIDAdapter implements PIDSource, PIDOutput
 	{
-		public void pidUpdate()
-		{
-			pidWrite(pidGet());
-		}
 		public void pidWrite(double output) 
 		{
 			latestOutput = output;

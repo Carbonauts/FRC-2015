@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.command.Command;
  * an enumeration, Elevator.Position with values LEVEL1,
  * LEVEL2, LEVEL3, LEVEL4, and LEVEL5.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
+ * TODO This command may not be necessary, look into replacing the
+ * entire command with a simple Elevator.setSetpoint() statement.
  */
 public class ElevatorToPositionCommand extends Command
 {

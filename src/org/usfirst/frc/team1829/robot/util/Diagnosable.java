@@ -1,4 +1,4 @@
-package org.usfirst.frc.team1829.robot.subsystems;
+package org.usfirst.frc.team1829.robot.util;
 
 /**
  * Interface intended to be implemented by all subsystems
@@ -13,6 +13,12 @@ public interface Diagnosable
 	 * @return Status or condition of diagnosable object.
 	 */
 	String getFeedback();
+	
+	/**
+	 * Gathers data the same way as getFeedback() but instead
+	 * pushes the data to the SmartDashboard.
+	 */
+	void updateSmartDS();
 	
 	/**
 	 * Diagnosable objects need to keep track of the last significant

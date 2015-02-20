@@ -1,22 +1,19 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
-import org.usfirst.frc.team1829.robot.subsystems.Jaw;
+import org.usfirst.frc.team1829.robot.subsystems.Elevator;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-public class JawDiagnosticCommand extends Command
+public class OperatorElevatorCommand extends Command
 {
-	private Jaw jaw;
+	private Elevator elevator;
 	private boolean finished;
 	
-	/**
-	 * Default constructor.
-	 */
-	public JawDiagnosticCommand()
+	public OperatorElevatorCommand()
 	{
-		super("JawDiagnosticCommand");
-		requires(jaw = Robot.getJaw());
+		super("OperatorElevatorCommand");
+		requires(elevator = Robot.getElevator());
 	}
 	
 	@Override
@@ -28,7 +25,8 @@ public class JawDiagnosticCommand extends Command
 	@Override
 	protected void execute() 
 	{
-		
+		//elevator.setSetpoint(elevator.getSetpoint() + Robot.getUI().getAxisData(Robot.UI_ELEV_Y));
+		elevator.setAbsolutePower(Robot.getUI().getAxisData(Robot.UI_ELEV_Y));
 	}
 
 	@Override
