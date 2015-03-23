@@ -21,7 +21,7 @@ public class DriveOnLineCommand extends Command
 	private PIDController rotationController;
 	private RotationPIDAdapter rotationAdapter;
 	
-	private double rotationP = 1.0/2000.0;
+	private double rotationP = 1.0/1000.0;
 	private double rotationI = 0;
 	private double rotationD = 0;
 	private double latestOutput = 0;
@@ -58,6 +58,7 @@ public class DriveOnLineCommand extends Command
 	protected void initialize() 
 	{
 		finished = false;
+		rotationController.setOutputRange(-0.4, 0.4);
 		rotationController.setSetpoint(drive.getLineFollowingFactor());
 		System.out.println("Setpoint:" + rotationController.getSetpoint());
 		
@@ -70,7 +71,7 @@ public class DriveOnLineCommand extends Command
 	{
 		//if(jaw.encounteredContainer()) {}  //Stop when we hit a new container
 		drive.driveArcade(0, latestOutput);
-		System.out.println("LatestOutput:" + latestOutput);
+		System.out.println("LatestOutput: " + latestOutput);
 	}
 
 	@Override

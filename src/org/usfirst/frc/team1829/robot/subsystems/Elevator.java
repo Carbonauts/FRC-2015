@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Subsystem that controls the vertical movement of the
- * Container-grabbing arm (conveyor).  This implements a 
+ * Container-grabbing arm (conveyer).  This implements a 
  * PID control system to allow smooth movement.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
@@ -54,7 +54,7 @@ public class Elevator extends Subsystem implements Diagnosable
 	private Talon motor;
 	
 	/**
-	 * The ultrasoinc attached to the subsystem to provide
+	 * The ultrasonic attached to the subsystem to provide
 	 * feedback for the PID controller.
 	 */
 	private CarbonAnalogInput ultrasonic;

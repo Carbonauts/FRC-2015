@@ -1,5 +1,11 @@
 <xml version="1.0">
 <dashboard>
+	<widget field="Drive Rear Left Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="174"/>
+	</widget>
+	<widget field="Drive Rear Right Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="153"/>
+	</widget>
 	<widget field="Elevator Ultrasonic Smoothed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="671" y="562"/>
 		<width>190</width>
@@ -80,7 +86,4 @@
 </dashboard>
 <live-window>
 </live-window>
-	<hidden field="Drive Rear Left Encoder"/>
-	<hidden field="LOG"/>
-	<hidden field="Drive Rear Right Encoder"/>
 </xml>
