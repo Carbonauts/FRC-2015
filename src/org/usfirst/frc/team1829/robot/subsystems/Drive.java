@@ -8,7 +8,8 @@ import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.command.OperatorDriveCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
-import edu.wpi.first.wpilibj.AnalogInput;
+import com.team1829.library.CarbonAnalogInput;
+
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -52,14 +53,9 @@ public class Drive extends Subsystem implements Diagnosable
 	 * line-following device (an arduino
 	 * that outputs the analog value).
 	 */
-	private AnalogInput lineFollower;
+	private CarbonAnalogInput lineFollower;
 	
 	private Timer driveUpkeepTimer;
-	
-	/**
-	 * Drive gyro.
-	 */
-	//private Gyro gyro;
 	
 	//TODO set real PID values
 	/**
@@ -102,7 +98,7 @@ public class Drive extends Subsystem implements Diagnosable
 		motorRightMaster = new CANTalon(Robot.DRIVE_FRONT_RIGHT);
 		motorRightSlave = new CANTalon(Robot.DRIVE_REAR_RIGHT);
 		
-		lineFollower = new AnalogInput(Robot.DRIVE_LINE);
+		lineFollower = new CarbonAnalogInput(Robot.DRIVE_LINE, CarbonAnalogInput.SmoothingMode.AVERAGE, 5, 20);
 		driveUpkeepTimer = new Timer();
 		
 		/*
@@ -144,9 +140,9 @@ public class Drive extends Subsystem implements Diagnosable
 	 * Returns the value retrieved from the off-board
 	 * line following calculator.
 	 */
-	public int getLineFollowingFactor()
+	public double getLineFollowingFactor()
 	{
-		return lineFollower.getValue();
+		return lineFollower.getAverageSmoothedValue();
 	}
 	
 	/**
@@ -250,7 +246,9 @@ public class Drive extends Subsystem implements Diagnosable
 	/**
 	 * Task that runs periodically to update the speed
 	 * ramp on the Talon SRXs based on the current value
-	 * of the Elevator's height.
+	 * of the Elevator's height.  This is to ensure that
+	 * we can't accidently drive near full speed while
+	 * the heavy weight of the arm is extended very high.
 	 * @author Nick Mosher, Team 1829 Carbonauts Captain
 	 */
 	public class DampeningTask extends TimerTask

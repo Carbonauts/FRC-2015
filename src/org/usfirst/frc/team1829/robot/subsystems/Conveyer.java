@@ -1,56 +1,52 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.util.Cruisable;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
+//import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 /**
- * The conveyor is the subsystem that transports all CONTAINERS
+ * The conveyer is the subsystem that transports all CONTAINERS
  * from the jaw into the robot for storage.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class Conveyor extends Subsystem
+public class Conveyer extends Subsystem implements Cruisable
 {
 	/**
-	 * Motor to move the conveyor system.
+	 * Motor to move the conveyer system.
 	 */
 	private Talon conveyorMotor;
 	
 	/**
-	 * Encoder to watch the conveyor motion.
-	 */
-	private Encoder conveyorEncoder;
-	
-	/**
 	 * Limit switch that triggers as a CONTAINER
-	 * moves from the Jaw feeder into the conveyor.
+	 * moves from the Jaw feeder into the conveyer.
 	 */
 	private DigitalInput enterLimit;
 	
 	/**
 	 * Limit switch that triggers when a CONTAINER
-	 * reaches the far back of the conveyor.
+	 * reaches the far back of the conveyer.
 	 */
 	private DigitalInput fullLimit;
 	
 	/**
-	 * Default speed that the conveyor should move
+	 * Default speed that the conveyer should move
 	 * when switching positions.
 	 */
 	private double cruiseSpeed = 0.6;
 	
 	/**
-	 * Constructs the conveyor.
+	 * Constructs the conveyer.
 	 */
-	public Conveyor()
+	public Conveyer()
 	{
 		conveyorMotor = new Talon(Robot.CONVEYOR_MOTOR);
-		conveyorEncoder = new Encoder(Robot.CONVEYOR_ENCODER_A,
+		/*conveyorEncoder = new Encoder(Robot.CONVEYOR_ENCODER_A,
 									  Robot.CONVEYOR_ENCODER_B,
-									  Robot.CONVEYOR_DIRECTION);
+									  Robot.CONVEYOR_DIRECTION);*/
 	}
 	
 	@Override
@@ -60,19 +56,19 @@ public class Conveyor extends Subsystem
 	}
 	
 	/**
-	 * Rolls the conveyor in at the cruise speed.
+	 * Rolls the conveyer in at the cruise speed.
 	 */
 	public void rollIn()
 	{
-		conveyorMotor.set(cruiseSpeed);
+		conveyorMotor.set(this.cruiseSpeed);
 	}
 	
 	/**
-	 * Rolls the conveyor out at the cruise speed.
+	 * Rolls the conveyer out at the cruise speed.
 	 */
 	public void rollOut()
 	{
-		conveyorMotor.set(-cruiseSpeed);
+		conveyorMotor.set(-this.cruiseSpeed);
 	}
 	
 	/**
@@ -96,7 +92,7 @@ public class Conveyor extends Subsystem
 	}
 	
 	/**
-	 * Stops the conveyor motor.
+	 * Stops the conveyer motor.
 	 */
 	public void stop()
 	{
@@ -104,7 +100,7 @@ public class Conveyor extends Subsystem
 	}
 	
 	/**
-	 * Directly sets the speed of the conveyor motor.
+	 * Directly sets the speed of the conveyer motor.
 	 * @param speed The speed of the motor, from [-1, 1]
 	 */
 	public void setPower(double speed)
@@ -121,7 +117,7 @@ public class Conveyor extends Subsystem
 	}
 	
 	/**
-	 * Sets the cruise speed of the conveyor, or the 
+	 * Sets the cruise speed of the conveyer, or the 
 	 * speed that it moves at by default.
 	 * @param speed The new cruise speed, from [0, 1.0].
 	 */
@@ -135,6 +131,11 @@ public class Conveyor extends Subsystem
 		{
 			speed = 0;
 		}
-		cruiseSpeed = speed;
+		this.cruiseSpeed = speed;
+	}
+	
+	public double getCruiseSpeed()
+	{
+		return this.cruiseSpeed;
 	}
 }

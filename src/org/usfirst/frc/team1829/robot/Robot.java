@@ -1,11 +1,7 @@
 package org.usfirst.frc.team1829.robot;
 
-import org.usfirst.frc.team1829.robot.command.DriveOnLineCommand;
-import org.usfirst.frc.team1829.robot.command.ElevatorToPositionCommand;
-import org.usfirst.frc.team1829.robot.command.OperatorElevatorCommand;
-import org.usfirst.frc.team1829.robot.command.TurretToParallelCommand;
-import org.usfirst.frc.team1829.robot.command.TurretToPerpendicularCommand;
-import org.usfirst.frc.team1829.robot.subsystems.Conveyor;
+import org.usfirst.frc.team1829.robot.command.*;
+import org.usfirst.frc.team1829.robot.subsystems.Conveyer;
 import org.usfirst.frc.team1829.robot.subsystems.Drive;
 import org.usfirst.frc.team1829.robot.subsystems.Elevator;
 import org.usfirst.frc.team1829.robot.subsystems.Jaw;
@@ -13,7 +9,6 @@ import org.usfirst.frc.team1829.robot.subsystems.Turret;
 
 import com.team1829.library.CarbonUI;
 import com.team1829.library.CarbonUI.ControlType;
-import com.team1829.library.LatchBoolean;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -40,7 +35,6 @@ public class Robot extends IterativeRobot
 	public static final String UI_ELEVATOR_POS2 = "0x07";
 	public static final String UI_ELEVATOR_POS3 = "0x08";
 	
-	//TODO add real PWM channel numbers.
 	//Drive CAN ID/DIOs
 	public static final int DRIVE_FRONT_RIGHT = 1;			//CAN
 	public static final int DRIVE_FRONT_LEFT = 2;			//CAN
@@ -52,11 +46,11 @@ public class Robot extends IterativeRobot
 	public static final int TURRET_LIMIT_PARALLEL = 3;		//DIO
 	public static final int TURRET_LIMIT_PERPENDICULAR = 4;	//DIO
 	//Elevator PWM/DIOs
-	public static final int ELEVATOR_MOTOR = 2;				//PWM <- CORRECT VALUE
-	public static final int ELEVATOR_ULTRA = 1;				//Analog <- CORRECT VALUE
+	public static final int ELEVATOR_MOTOR = 2;				//PWM     <- CORRECT VALUE
+	public static final int ELEVATOR_ULTRA = 1;				//Analog  <- CORRECT VALUE
 	public static final boolean ELEVATOR_DIRECTION = false; //Inversion constant for elevator.
-	public static final int ELEVATOR_LIMIT_TOP = 0;			//DIO <- CORRECT VALUE
-	public static final int ELEVATOR_LIMIT_BOT = 1;			//DIO <- CORRECT VALUE
+	public static final int ELEVATOR_LIMIT_TOP = 0;			//DIO     <- CORRECT VALUE
+	public static final int ELEVATOR_LIMIT_BOT = 1;			//DIO     <- CORRECT VALUE
 	//Conveyor PWM/DIOs
 	public static final int CONVEYOR_MOTOR = 5;				//PWM
 	public static final int CONVEYOR_ENCODER_A = 9;			//DIO
@@ -66,6 +60,8 @@ public class Robot extends IterativeRobot
 	public static final int JAW_GRAB_MOTOR = 3;				//PWM
 	public static final int JAW_FEED_MOTOR = 4;				//PWM
 	public static final int JAW_LIMIT_RETRACT = 11;			//DIO
+	public static final int JAW_LIMIT_EXTENT = -1;                    //TODO set DIO
+	public static final int JAW_LIMIT_CLAMP = -1;                     //TODO set DIO
 	public static final int JAW_LIMIT_ENCOUNTER = 12;		//DIO
 	
 	/**
@@ -91,7 +87,7 @@ public class Robot extends IterativeRobot
 	/**
 	 * The active instance of the Conveyor system.
 	 */
-	private static Conveyor carbonConveyor;
+	private static Conveyer carbonConveyor;
 	
 	/**
 	 * The active instance of the Jaw system.
@@ -105,15 +101,6 @@ public class Robot extends IterativeRobot
 	private TurretToParallelCommand turretParaCommand;
 	private ElevatorToPositionCommand elevPosCommand;
 	
-	/*
-	 * Initialize latch references used to detect button clicks
-	 */
-	private LatchBoolean turretPerpLatch;
-	private LatchBoolean turretParaLatch;
-	private LatchBoolean elevatorPos1Latch;
-	private LatchBoolean elevatorPos2Latch;
-	private LatchBoolean elevatorPos3Latch;
-	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -124,19 +111,13 @@ public class Robot extends IterativeRobot
         carbonDrive = new Drive();
         carbonTurret = new Turret();
         carbonElevator = new Elevator();
-        carbonConveyor = new Conveyor();
+        carbonConveyor = new Conveyer();
         carbonJaw = new Jaw();
         ui = new CarbonUI();
         
         turretPerpCommand = new TurretToPerpendicularCommand();
         turretParaCommand = new TurretToParallelCommand();
         elevPosCommand = new ElevatorToPositionCommand(Elevator.Position.AUTO);
-        
-        turretPerpLatch = new LatchBoolean();
-        turretParaLatch = new LatchBoolean();
-        elevatorPos1Latch = new LatchBoolean();
-        elevatorPos2Latch = new LatchBoolean();
-        elevatorPos3Latch = new LatchBoolean();
         
         ui.addControl(UI_DRIVE_Y, ControlType.AXIS, 0, 1);
         ui.addControl(UI_DRIVE_R, ControlType.AXIS, 0, 0);
@@ -172,7 +153,7 @@ public class Robot extends IterativeRobot
     public void teleopInit() 
     {
     	System.out.println("Robot.teleopInit();");
-    	Scheduler.getInstance().add(new OperatorElevatorCommand());
+    	Scheduler.getInstance().add(new DriveOnLineCommand());
     }
     
     /**
@@ -180,10 +161,10 @@ public class Robot extends IterativeRobot
      */
     public void teleopPeriodic() 
     {
-    	/*//////////////////////////////////////////////////////////////////////////////////////////////////
+    	/*/////////////////////////////////////////////////////////////////////
     	 * Section dedicated to launching commands based on user button inputs.
-    	 */
-    	if(turretPerpLatch.onTrue(getUI().getButtonData(UI_TURRET_PERPENDICULAR)))
+    	 */////////////////////////////////////////////////////////////////////
+    	if(getUI().getButtonPress(UI_TURRET_PERPENDICULAR))
     	{
     		if(!turretPerpCommand.isRunning())
     		{
@@ -191,7 +172,7 @@ public class Robot extends IterativeRobot
     		}
     	}
     	
-    	if(turretParaLatch.onTrue(getUI().getButtonData(UI_TURRET_PARALLEL)))
+    	if(getUI().getButtonPress(UI_TURRET_PARALLEL))
     	{
     		if(!turretParaCommand.isRunning())
     		{
@@ -199,7 +180,7 @@ public class Robot extends IterativeRobot
     		}
     	}
     	
-    	if(elevatorPos1Latch.onTrue(getUI().getButtonData(UI_ELEVATOR_POS1)))
+    	if(getUI().getButtonPress(UI_ELEVATOR_POS1))
     	{
     		if(!elevPosCommand.isRunning())
     		{
@@ -208,7 +189,7 @@ public class Robot extends IterativeRobot
     		}
     	}
     	
-    	if(elevatorPos2Latch.onTrue(getUI().getButtonData(UI_ELEVATOR_POS2)))
+    	if(getUI().getButtonPress(UI_ELEVATOR_POS2))
     	{
     		if(!elevPosCommand.isRunning())
     		{
@@ -217,7 +198,7 @@ public class Robot extends IterativeRobot
     		}
     	}
     	
-    	if(elevatorPos3Latch.onTrue(getUI().getButtonData(UI_ELEVATOR_POS3)))
+    	if(getUI().getButtonPress(UI_ELEVATOR_POS3))
     	{
     		if(!elevPosCommand.isRunning())
     		{
@@ -225,9 +206,9 @@ public class Robot extends IterativeRobot
     			Scheduler.getInstance().add(elevPosCommand);
     		}
     	}
-    	/*
+    	/*/////////////////////////////////////////////////////////////////////
     	 * End dedicated command-launching section.
-    	 *//////////////////////////////////////////////////////////////////////////////////////////////////
+    	 */////////////////////////////////////////////////////////////////////
     	
         Scheduler.getInstance().run();
         updateSubsystemDSOutputs();
@@ -292,7 +273,7 @@ public class Robot extends IterativeRobot
 	 * Returns the instance of the conveyor system.
 	 * @return The instance of the conveyor system.
 	 */
-	public static Conveyor getConveyor()
+	public static Conveyer getConveyor()
 	{
 		return carbonConveyor;
 	}
