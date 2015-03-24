@@ -24,12 +24,6 @@ public class Jaw extends Subsystem implements Cruisable
 	private Talon jawMotor;
 	
 	/**
-	 * Motor that drives the gripping rollers that move
-	 * CONTAINERS from the Jaw to the Conveyer.
-	 */
-	private Talon feedMotor;
-	
-	/**
 	 * Limit switch that triggers when the Jaw is in its
 	 * fully retracted position.
 	 */
@@ -59,15 +53,13 @@ public class Jaw extends Subsystem implements Cruisable
 	
 	private double cruiseSpeed = 0.6; //TODO Find appropriate value for default.
 	
-	private double feedSpeed = 0.6; //TODO Find appropriate value for default.
-	
 	/**
 	 * Constructs the Jaw subsystem.
 	 */
 	public Jaw()
 	{
+		super("Jaw");
 		jawMotor = new Talon(Robot.JAW_GRAB_MOTOR);
-		feedMotor = new Talon(Robot.JAW_FEED_MOTOR);
 		retractLimit = new DigitalInput(Robot.JAW_LIMIT_RETRACT);
 		extendLimit = new DigitalInput(Robot.JAW_LIMIT_EXTENT);
 		clampLimit = new DigitalInput(Robot.JAW_LIMIT_CLAMP);
@@ -79,55 +71,6 @@ public class Jaw extends Subsystem implements Cruisable
 	protected void initDefaultCommand() 
 	{
 		
-	}
-	
-	/**
-	 * Sets the feeders to roll at the specified speed.
-	 * @param speed
-	 */
-	public void feed(double speed)
-	{
-		if(speed > 1.0)
-		{
-			speed = 1.0;
-		}
-		else if(speed < -1.0)
-		{
-			speed = -1.0;
-		}
-		feedMotor.set(speed);
-	}
-	
-	/**
-	 * Spins the feeder rollers to pull a container up and into
-	 * the jaw.  Should be called after clamp().
-	 */
-	public void feedIn()
-	{
-		if(feedSpeed > 0)
-		{
-			feed(this.feedSpeed);
-		}
-		else
-		{
-			feed(-this.feedSpeed);
-		}
-	}
-	
-	/**
-	 * Spins the feeder rollers to release a container from the
-	 * jaw, lowering it out of the grasp.
-	 */
-	public void feedOut()
-	{
-		if(this.feedSpeed > 0)
-		{
-			feedMotor.set(-this.feedSpeed);
-		}
-		else
-		{
-			feedMotor.set(this.feedSpeed);
-		}
 	}
 	
 	/**
@@ -276,32 +219,5 @@ public class Jaw extends Subsystem implements Cruisable
 	public double getCruiseSpeed() 
 	{	
 		return this.cruiseSpeed;
-	}
-	
-	/**
-	 * Sets the speed to be used in feedIn() and feedOut().
-	 * More precise control can be achieved with feed(double speed).
-	 * @param speed The cruise speed for the feeder.
-	 */
-	public void setFeedSpeed(double speed)
-	{
-		if(speed > 1.0)
-		{
-			speed = 1.0;
-		}
-		else if(speed < 0)
-		{
-			speed = 0;
-		}
-		this.feedSpeed = speed;
-	}
-	
-	/**
-	 * Returns the speed of the feeder while in use with feedIn() and feedOut().
-	 * @return
-	 */
-	public double getFeedSpeed()
-	{
-		return this.feedSpeed;
 	}
 }

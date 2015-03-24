@@ -43,6 +43,7 @@ public class Conveyer extends Subsystem implements Cruisable
 	 */
 	public Conveyer()
 	{
+		super("Conveyer");
 		conveyorMotor = new Talon(Robot.CONVEYOR_MOTOR);
 		/*conveyorEncoder = new Encoder(Robot.CONVEYOR_ENCODER_A,
 									  Robot.CONVEYOR_ENCODER_B,

@@ -43,7 +43,7 @@ public class Turret extends Subsystem implements Diagnosable
 	 * The default speed that methods in this subsystem
 	 * cause the motor to turn at.
 	 */
-	private double cruiseSpeed = 0.6;
+	private double cruiseSpeed = 0.4;
 	
 	private String lastOperation = "";
 	
@@ -99,6 +99,15 @@ public class Turret extends Subsystem implements Diagnosable
 		else if(power < -1.0)
 		{
 			power = -1.0;
+		}
+		
+		if(power > 0 && isParallel())
+		{
+			power = 0;
+		}
+		if(power < 0 && isPerpendicular())
+		{
+			power = 0;
 		}
 		turretMotor.set(power);
 		lastOperation = "setPower(" + formatter.format(power) + ")";

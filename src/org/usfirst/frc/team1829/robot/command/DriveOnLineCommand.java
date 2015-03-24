@@ -21,7 +21,7 @@ public class DriveOnLineCommand extends Command
 	private PIDController rotationController;
 	private RotationPIDAdapter rotationAdapter;
 	
-	private double rotationP = 1.0/1000.0;
+	private double rotationP = 1.0/1800.0;
 	private double rotationI = 0;
 	private double rotationD = 0;
 	private double latestOutput = 0;
@@ -58,19 +58,28 @@ public class DriveOnLineCommand extends Command
 	protected void initialize() 
 	{
 		finished = false;
-		rotationController.setOutputRange(-0.4, 0.4);
-		rotationController.setSetpoint(drive.getLineFollowingFactor());
-		System.out.println("Setpoint:" + rotationController.getSetpoint());
 		
 		rotationController.reset();
+		
+		latestOutput = 0;
+		rotationController.setOutputRange(-1.0, 1.0);
+		rotationController.setSetpoint(1000);
+		System.out.println("Setpoint:" + rotationController.getSetpoint());
+		
 		rotationController.enable();
 	}
 
 	@Override
 	protected void execute() 
 	{
-		//if(jaw.encounteredContainer()) {}  //Stop when we hit a new container
-		drive.driveArcade(0, latestOutput);
+		if(Robot.getUI().getButtonPress(Robot.UI_CANCEL_LINE))
+		{
+			finished = true;
+			return;
+		}
+		System.out.print("Following Line!");
+		drive.driveArcade(0.6, -latestOutput);
+		System.out.print(" Dampener=" + Robot.getUI().getAxisData(Robot.UI_DRIVE_DAMPENER) + " ");
 		System.out.println("LatestOutput: " + latestOutput);
 	}
 

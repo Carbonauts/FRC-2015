@@ -214,7 +214,7 @@ public class Drive extends Subsystem implements Diagnosable
 		feedback.append(" FR:").append(formatter.format(motorRightMaster.getEncPosition()));
 		feedback.append(" RL:").append(formatter.format(motorLeftSlave.getEncPosition()));
 		feedback.append(" RR:").append(formatter.format(motorRightSlave.getEncPosition()));
-		DecimalFormat lineFormat = new DecimalFormat("0000.##");
+		DecimalFormat lineFormat = new DecimalFormat("0000.00");
 		feedback.append(" Line:").append(lineFormat.format(getLineFollowingFactor()));
 		feedback.append(lastOperation());
 		return feedback.toString();

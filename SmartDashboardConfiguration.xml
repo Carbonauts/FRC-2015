@@ -1,11 +1,5 @@
 <xml version="1.0">
 <dashboard>
-	<widget field="Drive Rear Left Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="0" y="174"/>
-	</widget>
-	<widget field="Drive Rear Right Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="0" y="153"/>
-	</widget>
 	<widget field="Elevator Ultrasonic Smoothed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="671" y="562"/>
 		<width>190</width>
@@ -16,7 +10,7 @@
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
 		<location x="1236" y="7"/>
 		<width>337</width>
-		<height>332</height>
+		<height>31</height>
 	</static-widget>
 	<widget field="Elevator Last Operation" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="4" y="410"/>
@@ -44,26 +38,6 @@
 	<widget field="Drive Front Left Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="227" y="45"/>
 	</widget>
-	<widget field="Turret Perpendicular Limit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="8" y="132"/>
-		<width>209</width>
-		<height>20</height>
-	</widget>
-	<widget field="Turret Parallel Lmiit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="87" y="47"/>
-		<width>114</width>
-		<height>78</height>
-	</widget>
-	<widget field="Elevator Bottom Limit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="1088" y="193"/>
-		<width>130</width>
-		<height>138</height>
-	</widget>
-	<widget field="Elevator Top Limit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="1086" y="39"/>
-		<width>118</width>
-		<height>126</height>
-	</widget>
 	<widget field="Drive Front Right Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="440" y="45"/>
 	</widget>
@@ -86,4 +60,10 @@
 </dashboard>
 <live-window>
 </live-window>
+	<hidden field="Turret Parallel Lmiit"/>
+	<hidden field="Elevator Bottom Limit"/>
+	<hidden field="Elevator Top Limit"/>
+	<hidden field="Turret Perpendicular Limit"/>
+	<hidden field="Drive Rear Left Encoder"/>
+	<hidden field="Drive Rear Right Encoder"/>
 </xml>

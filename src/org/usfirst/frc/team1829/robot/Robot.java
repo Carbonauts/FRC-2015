@@ -4,6 +4,7 @@ import org.usfirst.frc.team1829.robot.command.*;
 import org.usfirst.frc.team1829.robot.subsystems.Conveyer;
 import org.usfirst.frc.team1829.robot.subsystems.Drive;
 import org.usfirst.frc.team1829.robot.subsystems.Elevator;
+import org.usfirst.frc.team1829.robot.subsystems.Feeder;
 import org.usfirst.frc.team1829.robot.subsystems.Jaw;
 import org.usfirst.frc.team1829.robot.subsystems.Turret;
 
@@ -28,6 +29,12 @@ public class Robot extends IterativeRobot
 	public static final String UI_DRIVE_Y = "0x00";
 	public static final String UI_DRIVE_X = "0x01";
 	public static final String UI_DRIVE_R = "0x02";
+	//Start temp stuff
+	public static final String UI_DRIVE_LINE = "0x002";
+	public static final String UI_DRIVE_DAMPENER = "0x0021";
+	public static final String UI_CANCEL_LINE = "0x0022";
+	public static final String UI_START_LINE = "0x0023";
+	//End temp stuff
 	public static final String UI_ELEV_Y = "0x03";
 	public static final String UI_TURRET_PERPENDICULAR = "0x04";
 	public static final String UI_TURRET_PARALLEL = "0x05";
@@ -60,8 +67,8 @@ public class Robot extends IterativeRobot
 	public static final int JAW_GRAB_MOTOR = 3;				//PWM
 	public static final int JAW_FEED_MOTOR = 4;				//PWM
 	public static final int JAW_LIMIT_RETRACT = 11;			//DIO
-	public static final int JAW_LIMIT_EXTENT = -1;                    //TODO set DIO
-	public static final int JAW_LIMIT_CLAMP = -1;                     //TODO set DIO
+	public static final int JAW_LIMIT_EXTENT = 7;                    //TODO set DIO
+	public static final int JAW_LIMIT_CLAMP = 8;                     //TODO set DIO
 	public static final int JAW_LIMIT_ENCOUNTER = 12;		//DIO
 	
 	/**
@@ -85,14 +92,19 @@ public class Robot extends IterativeRobot
 	private static Elevator carbonElevator;
 	
 	/**
-	 * The active instance of the Conveyor system.
+	 * The active instance of the Conveyer system.
 	 */
-	private static Conveyer carbonConveyor;
+	private static Conveyer carbonConveyer;
 	
 	/**
 	 * The active instance of the Jaw system.
 	 */
 	private static Jaw carbonJaw;
+	
+	/**
+	 * The active instance of the Feeder system.
+	 */
+	private static Feeder carbonFeeder;
 	
 	/*
 	 * Initialize command references
@@ -100,6 +112,7 @@ public class Robot extends IterativeRobot
 	private TurretToPerpendicularCommand turretPerpCommand;
 	private TurretToParallelCommand turretParaCommand;
 	private ElevatorToPositionCommand elevPosCommand;
+	private DriveOnLineCommand lineCommand;
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -111,22 +124,27 @@ public class Robot extends IterativeRobot
         carbonDrive = new Drive();
         carbonTurret = new Turret();
         carbonElevator = new Elevator();
-        carbonConveyor = new Conveyer();
+        carbonConveyer = new Conveyer();
         carbonJaw = new Jaw();
         ui = new CarbonUI();
         
         turretPerpCommand = new TurretToPerpendicularCommand();
         turretParaCommand = new TurretToParallelCommand();
         elevPosCommand = new ElevatorToPositionCommand(Elevator.Position.AUTO);
+        lineCommand = new DriveOnLineCommand();
         
         ui.addControl(UI_DRIVE_Y, ControlType.AXIS, 0, 1);
         ui.addControl(UI_DRIVE_R, ControlType.AXIS, 0, 0);
         ui.addControl(UI_ELEV_Y, ControlType.AXIS, 0, 2);
         ui.addControl(UI_TURRET_PERPENDICULAR, ControlType.BUTTON, 0, 2);
         ui.addControl(UI_TURRET_PARALLEL, ControlType.BUTTON, 0, 4);
-        ui.addControl(UI_ELEVATOR_POS1, ControlType.BUTTON, 0, 8);
+        //ui.addControl(UI_ELEVATOR_POS1, ControlType.BUTTON, 0, 8);
         ui.addControl(UI_ELEVATOR_POS2, ControlType.BUTTON, 0, 7);
-        ui.addControl(UI_ELEVATOR_POS3, ControlType.BUTTON, 0, 9);
+        //ui.addControl(UI_ELEVATOR_POS3, ControlType.BUTTON, 0, 9);
+        ui.addControl(UI_DRIVE_LINE, ControlType.BUTTON, 0, 8);
+        ui.addControl(UI_DRIVE_DAMPENER, ControlType.AXIS, 0, 3);
+        ui.addControl(UI_CANCEL_LINE, ControlType.BUTTON, 0, 10);
+        ui.addControl(UI_START_LINE, ControlType.BUTTON, 0, 9);
     }
 
     /**
@@ -135,7 +153,7 @@ public class Robot extends IterativeRobot
     public void autonomousInit() 
     {
     	System.out.println("Robot.autonomousInit();");
-    	Scheduler.getInstance().add(new DriveOnLineCommand());
+    	Scheduler.getInstance().add(new CheckSubsystemsCommand());
     }
 
     /**
@@ -206,6 +224,11 @@ public class Robot extends IterativeRobot
     			Scheduler.getInstance().add(elevPosCommand);
     		}
     	}
+    	
+    	if(getUI().getButtonPress(UI_START_LINE))
+    	{
+    		Scheduler.getInstance().add(lineCommand);
+    	}
     	/*/////////////////////////////////////////////////////////////////////
     	 * End dedicated command-launching section.
     	 */////////////////////////////////////////////////////////////////////
@@ -273,9 +296,9 @@ public class Robot extends IterativeRobot
 	 * Returns the instance of the conveyor system.
 	 * @return The instance of the conveyor system.
 	 */
-	public static Conveyer getConveyor()
+	public static Conveyer getConveyer()
 	{
-		return carbonConveyor;
+		return carbonConveyer;
 	}
 	
 	/**
@@ -285,6 +308,15 @@ public class Robot extends IterativeRobot
 	public static Jaw getJaw()
 	{
 		return carbonJaw;
+	}
+	
+	/**
+	 * Returns the instance of the feeder system.
+	 * @return The instance of the feeder system.
+	 */
+	public static Feeder getFeeder()
+	{
+		return carbonFeeder;
 	}
 	
 	/**
