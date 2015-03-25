@@ -53,7 +53,7 @@ public class CheckDriveCommand extends Command
 			}
 			
 			power += 0.10;
-			System.out.println("CheckDriveCommand: Power=" + power);
+			System.out.println("CheckDriveCommand: Routine=" + routine.toString() + " Power=" + power);
 			timer.reset(delay);
 		}
 		
