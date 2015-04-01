@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Drive extends Subsystem implements Diagnosable
 {	
-	DecimalFormat formatter = new DecimalFormat("0000.00");
+	DecimalFormat formatter = new DecimalFormat("00.00");
 	
 	/**
 	 * Front-left drive motor as a Talon.
@@ -161,6 +161,9 @@ public class Drive extends Subsystem implements Diagnosable
 	 */
 	public void driveArcade(double y, double x)
 	{
+		//Invert direction based on Robot constants.
+		y = Robot.DRIVE_Y_INVERTED ? -y : y;
+		x = Robot.DRIVE_X_INVERTED ? -x : x;
 		driveTrain.arcadeDrive(y, x);
 		lastOperation = "driveArcade(" + formatter.format(y) + ", " + formatter.format(x) + ")";
 	}
@@ -207,16 +210,13 @@ public class Drive extends Subsystem implements Diagnosable
 	 * Returns a string representation of the status
 	 * of the drive subsystem.
 	 */
-	public String getFeedback() 
+	public String getStatus() 
 	{	
 		StringBuffer feedback = new StringBuffer("[" + getName() + "]");
-		feedback.append(" FL:").append(formatter.format(motorLeftMaster.getEncPosition()));
-		feedback.append(" FR:").append(formatter.format(motorRightMaster.getEncPosition()));
-		feedback.append(" RL:").append(formatter.format(motorLeftSlave.getEncPosition()));
-		feedback.append(" RR:").append(formatter.format(motorRightSlave.getEncPosition()));
+		feedback.append(" FL: ").append(formatter.format(motorLeftMaster.getEncPosition()));
+		feedback.append(" FR: ").append(formatter.format(motorRightMaster.getEncPosition()));
 		DecimalFormat lineFormat = new DecimalFormat("0000.00");
-		feedback.append(" Line:").append(lineFormat.format(getLineFollowingFactor()));
-		feedback.append(lastOperation());
+		feedback.append(" Line: ").append(lineFormat.format(getLineFollowingFactor()));
 		return feedback.toString();
 	}
 	
@@ -227,8 +227,6 @@ public class Drive extends Subsystem implements Diagnosable
 	{
 		SmartDashboard.putNumber("Drive Front Left Encoder", motorLeftMaster.getEncPosition());
 		SmartDashboard.putNumber("Drive Front Right Encoder", motorRightMaster.getEncPosition());
-		SmartDashboard.putNumber("Drive Rear Left Encoder", motorLeftSlave.getEncPosition());
-		SmartDashboard.putNumber("Drive Rear Right Encoder", motorRightSlave.getEncPosition());
 		SmartDashboard.putNumber("Drive Line Following Factor", getLineFollowingFactor());
 		SmartDashboard.putNumber("Drive Line Following Graph", getLineFollowingFactor());
 		SmartDashboard.putString("Drive Last Operation", lastOperation());

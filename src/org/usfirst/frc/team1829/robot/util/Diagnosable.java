@@ -12,7 +12,7 @@ public interface Diagnosable
 	 * Examples may be sensor values.
 	 * @return Status or condition of diagnosable object.
 	 */
-	String getFeedback();
+	String getStatus();
 	
 	/**
 	 * Gathers data the same way as getFeedback() but instead

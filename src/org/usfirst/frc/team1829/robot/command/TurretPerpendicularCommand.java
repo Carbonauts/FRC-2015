@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.command.Command;
  * and ready to grab the CONTAINERS from the step.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class TurretToPerpendicularCommand extends Command
+public class TurretPerpendicularCommand extends Command
 {
 	private boolean finished;
 	private Turret turret;
@@ -19,7 +19,7 @@ public class TurretToPerpendicularCommand extends Command
 	/**
 	 * Default constructor
 	 */
-	public TurretToPerpendicularCommand()
+	public TurretPerpendicularCommand()
 	{
 		super("TurretToPerpendicularCommand");
 		requires(turret = Robot.getTurret());
@@ -29,7 +29,7 @@ public class TurretToPerpendicularCommand extends Command
 	 * Constructor with timeout.
 	 * @param duration The time (in seconds) before this command "times out".
 	 */
-	public TurretToPerpendicularCommand(double duration)
+	public TurretPerpendicularCommand(double duration)
 	{
 		super("TurretToPerpendicularCommand", duration);
 		requires(turret = Robot.getTurret());

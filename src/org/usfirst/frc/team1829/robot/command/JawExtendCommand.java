@@ -1,6 +1,7 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.subsystems.Jaw;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -11,13 +12,16 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class JawExtendCommand extends Command
 {
+	private boolean finished = false;
+	private Jaw jaw;
+	
 	/**
 	 * Default constructor
 	 */
 	public JawExtendCommand()
 	{
 		super("JawOpenCommand");
-		requires(Robot.getJaw());
+		requires(jaw = Robot.getJaw());
 	}
 	
 	/**
@@ -27,31 +31,44 @@ public class JawExtendCommand extends Command
 	public JawExtendCommand(double duration)
 	{
 		super("JawOpenCommand", duration);
-		requires(Robot.getJaw());
+		requires(jaw = Robot.getJaw());
 	}
 	
 	@Override
 	protected void initialize() 
 	{
+		finished = false;
 		
+		if(jaw.isFullyExtended())
+		{
+			finished = true;
+		}
 	}
 
 	@Override
 	protected void execute() 
 	{
-		
+		if(jaw.isFullyExtended())
+		{
+			finished = true;
+			return;
+		}
+		else
+		{
+			jaw.extend();
+		}
 	}
 
 	@Override
 	protected boolean isFinished() 
 	{
-		return false;
+		return finished;
 	}
 
 	@Override
 	protected void end() 
 	{
-		
+		jaw.stop();
 	}
 
 	@Override

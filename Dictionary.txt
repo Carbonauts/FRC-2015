@@ -3,3 +3,9 @@ carbonauts
 talon
 ultrasonic
 tote
+holonomic
+strafing
+smartdashboard
+setpoint
+teleop
+dashboard

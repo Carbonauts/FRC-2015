@@ -184,13 +184,13 @@ public class Elevator extends Subsystem implements Diagnosable
 	}
 	
 	/**
-	 * Sets the motor power with no PID calculations.
+	 * Sets the motor power.  If being used manually,
+	 * be sure to call setPIDEnabled(false) or you will
+	 * conflict with the PID control.
 	 * @param power
 	 */
-	public void setAbsolutePower(double power)
-	{
-		setPIDEnabled(false);
-		
+	public void setPower(double power)
+	{		
 		if(power > 0 && !isAtTop())
 		{
 			motor.set(-power);
@@ -239,6 +239,10 @@ public class Elevator extends Subsystem implements Diagnosable
 		{
 			pidController.enable();
 		}
+		else
+		{
+			motor.stopMotor();
+		}
 		lastOperation = "setPIDEnabled(" + enabled + ")";
 	}
 	
@@ -283,18 +287,7 @@ public class Elevator extends Subsystem implements Diagnosable
 		{
 			if(pidEnabled)
 			{
-				if(output > 0 && !isAtTop())
-				{
-					motor.set(-output);
-				}
-				else if (output < 0 && !isAtBottom())
-				{
-					motor.set(-output);
-				}
-				else
-				{
-					motor.stopMotor();
-				}
+				setPower(output);
 			}
 		}
 
@@ -311,15 +304,14 @@ public class Elevator extends Subsystem implements Diagnosable
 	 * Returns a string representation of the status of this
 	 * subsystem.
 	 */
-	public String getFeedback() 
+	public String getStatus() 
 	{	
 		StringBuffer feedback = new StringBuffer("");
 		feedback.append("[" + getName() + "]");
 		DecimalFormat ultraFormat = new DecimalFormat("0000.00");
-		feedback.append(" Ultra-Smoothed:").append(ultraFormat.format(ultrasonic.getAverageSmoothedValue()));
-		feedback.append(" Ultra-Raw:").append(ultraFormat.format(ultrasonic.getRawValue()));
-		feedback.append(" TopLimit:").append(isAtTop() ? "T" : "F");
-		feedback.append(" BotLimit:").append(isAtBottom() ? "T" : "F");
+		feedback.append(" Ultra:").append(ultraFormat.format(ultrasonic.getAverageSmoothedValue()));
+		feedback.append(" TopLim:").append(isAtTop() ? "T" : "F");
+		feedback.append(" BotLim:").append(isAtBottom() ? "T" : "F");
 		return feedback.toString();
 	}
 	

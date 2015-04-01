@@ -26,7 +26,7 @@ public class OperatorElevatorCommand extends Command
 	protected void execute() 
 	{
 		//elevator.setSetpoint(elevator.getSetpoint() + Robot.getUI().getAxisData(Robot.UI_ELEV_Y));
-		elevator.setAbsolutePower(Robot.getUI().getAxisData(Robot.UI_ELEV_Y));
+		elevator.setPower(Robot.getUI().getAxisData(Robot.UI_ELEV_Y));
 	}
 
 	@Override

@@ -1,40 +1,41 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.subsystems.Jaw;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-/**
- * Stops the conveyor motor if it's in motion.
- * @author Nick Mosher, Team 1829 Carbonauts Captain
- */
-public class ConveyerFeedStopCommand extends Command
+public class JawStopCommand extends Command
 {
+	private boolean finished = false;
+	private Jaw jaw;
+	
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 */
-	public ConveyerFeedStopCommand()
+	public JawStopCommand()
 	{
-		super("ConveyorFeedStopCommand");
-		requires(Robot.getConveyer());
+		super("JawStopCommand");
+		requires(jaw = Robot.getJaw());
 	}
 	
 	@Override
 	protected void initialize() 
 	{
-		
+		finished = false;
+		jaw.stop();
 	}
 
 	@Override
 	protected void execute() 
 	{
-		
+		//Never stops execution
 	}
 
 	@Override
 	protected boolean isFinished() 
-	{
-		return false;
+	{	
+		return finished;
 	}
 
 	@Override

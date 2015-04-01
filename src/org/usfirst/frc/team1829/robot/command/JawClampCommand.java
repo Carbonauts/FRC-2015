@@ -1,23 +1,25 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.subsystems.Jaw;
 
 import edu.wpi.first.wpilibj.command.Command;
 
 public class JawClampCommand extends Command
 {
 	private boolean finished = false;
+	private Jaw jaw;
 	
 	public JawClampCommand()
 	{
 		super("JawClampCommand");
-		requires(Robot.getJaw());
+		requires(jaw = Robot.getJaw());
 	}
 	
 	public JawClampCommand(double duration)
 	{
 		super("JawClampCommand", duration);
-		requires(Robot.getJaw());
+		requires(jaw = Robot.getJaw());
 	}
 	
 	@Override

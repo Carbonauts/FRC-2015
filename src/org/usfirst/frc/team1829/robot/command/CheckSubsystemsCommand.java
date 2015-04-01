@@ -11,7 +11,7 @@ public class CheckSubsystemsCommand extends CommandGroup
 		addSequential(new CheckDriveCommand(CheckDriveCommand.Routine.Reverse, 2.0));
 		addSequential(new CheckDriveCommand(CheckDriveCommand.Routine.TurnLeft, 2.0));
 		addSequential(new CheckDriveCommand(CheckDriveCommand.Routine.TurnRight, 2.0));
-		addSequential(new TurretToPerpendicularCommand());
-		addSequential(new TurretToParallelCommand());
+		addSequential(new TurretPerpendicularCommand());
+		addSequential(new TurretParallelCommand());
 	}	
 }

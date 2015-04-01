@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.command.Command;
  * for transport and starting configurations.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class TurretToParallelCommand extends Command
+public class TurretParallelCommand extends Command
 {
 	private Turret turret;
 	private boolean finished;
@@ -19,7 +19,7 @@ public class TurretToParallelCommand extends Command
 	/**
 	 * Default constructor
 	 */
-	public TurretToParallelCommand()
+	public TurretParallelCommand()
 	{
 		super("TurretToParallelCommand");
 		requires(turret = Robot.getTurret());
@@ -29,7 +29,7 @@ public class TurretToParallelCommand extends Command
 	 * Constructor with timeout.
 	 * @param duration The time (in seconds) before this command "times out".
 	 */
-	public TurretToParallelCommand(double duration)
+	public TurretParallelCommand(double duration)
 	{
 		super("TurretToParallelCommand", duration);
 		requires(turret = Robot.getTurret());

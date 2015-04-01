@@ -165,11 +165,11 @@ public class Turret extends Subsystem implements Diagnosable
 		lastOperation = "setCruiseSpeed(" + formatter.format(speed) + ")";
 	}
 
-	public String getFeedback() 
+	public String getStatus() 
 	{	
-		StringBuffer feedback = new StringBuffer("");
-		feedback.append("[" + getName() + "] ParaLimit:").append(isParallel() ? "T" : "F");
-		feedback.append(" PerpLimit:").append(isPerpendicular() ? "T" : "F");
+		StringBuffer feedback = new StringBuffer("[" + getName() + "]");
+		feedback.append(" ParaLim:").append(isParallel() ? "T" : "F");
+		feedback.append(" PerpLim:").append(isPerpendicular() ? "T" : "F");
 		return feedback.toString();
 	}
 	

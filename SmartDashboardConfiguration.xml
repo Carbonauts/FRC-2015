@@ -1,69 +1,109 @@
 <xml version="1.0">
 <dashboard>
+	<widget field="Jaw Retracted" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="743" y="470"/>
+		<height>101</height>
+	</widget>
+	<widget field="Jaw Extended" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="741" y="342"/>
+		<height>99</height>
+	</widget>
+	<widget field="Jaw Last Operation" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="24" y="432"/>
+		<width>450</width>
+	</widget>
+	<widget field="Elevator Bottom Limit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="813" y="559"/>
+		<width>377</width>
+	</widget>
+	<widget field="Elevator Top Limit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="809" y="327"/>
+		<width>366</width>
+	</widget>
+	<widget field="Turret Perpendicular Limit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="812" y="432"/>
+		<width>209</width>
+	</widget>
+	<widget field="Turret Parallel Lmiit" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="1086" y="400"/>
+		<width>103</width>
+		<height>95</height>
+	</widget>
+	<widget field="Container Sensor" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="1209" y="300"/>
+	</widget>
+	<widget field="Extent Sensor" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="939" y="295"/>
+	</widget>
 	<widget field="Elevator Ultrasonic Smoothed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="671" y="562"/>
+		<location x="568" y="295"/>
 		<width>190</width>
 	</widget>
 	<widget field="Drive Line Following Factor" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="231" y="326"/>
+		<location x="201" y="294"/>
+		<width>181</width>
 	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
-		<location x="1236" y="7"/>
-		<width>337</width>
-		<height>31</height>
+		<location x="10" y="38"/>
+		<width>192</width>
+		<height>65</height>
 	</static-widget>
 	<widget field="Elevator Last Operation" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="4" y="410"/>
-		<width>654</width>
+		<width>470</width>
 		<height>20</height>
 	</widget>
 	<widget field="Turret Last Operation" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="14" y="389"/>
-		<width>645</width>
+		<width>460</width>
 		<height>20</height>
 	</widget>
 	<widget field="Drive Last Operation" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="19" y="368"/>
-		<width>641</width>
+		<width>455</width>
 		<height>20</height>
-	</widget>
-	<widget field="Elevator Ultrasonic" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="707" y="275"/>
-		<width>143</width>
 	</widget>
 	<widget field="Log" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="7" y="10"/>
-		<width>1216</width>
+		<width>1536</width>
 	</widget>
 	<widget field="Drive Front Left Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="227" y="45"/>
+		<location x="221" y="325"/>
+		<width>164</width>
 	</widget>
 	<widget field="Drive Front Right Encoder" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="440" y="45"/>
-	</widget>
-	<widget field="Elevator Ultrasonic Graph" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
-		<location x="673" y="37"/>
-		<height>260</height>
-		<property name="Buffer Size (samples)" value="100"/>
+		<location x="400" y="323"/>
+		<width>170</width>
 	</widget>
 	<widget field="Drive Line Following Graph" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
-		<location x="221" y="73"/>
-		<width>434</width>
+		<location x="219" y="41"/>
+		<width>363</width>
 		<height>276</height>
 		<property name="Buffer Size (samples)" value="100"/>
 	</widget>
 	<widget field="Elevator Ultrasonic Smoothed Graph" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
-		<location x="673" y="308"/>
+		<location x="589" y="40"/>
+		<width>377</width>
 		<height>278</height>
+		<property name="Buffer Size (samples)" value="100"/>
+	</widget>
+	<widget field="Extent Graph" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
+		<location x="979" y="41"/>
+		<width>269</width>
+		<height>280</height>
+		<property name="Buffer Size (samples)" value="100"/>
+	</widget>
+	<widget field="Container Graph" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
+		<location x="1256" y="41"/>
+		<width>292</width>
+		<height>280</height>
 		<property name="Buffer Size (samples)" value="100"/>
 	</widget>
 </dashboard>
 <live-window>
 </live-window>
-	<hidden field="Turret Parallel Lmiit"/>
-	<hidden field="Elevator Bottom Limit"/>
-	<hidden field="Elevator Top Limit"/>
-	<hidden field="Turret Perpendicular Limit"/>
 	<hidden field="Drive Rear Left Encoder"/>
 	<hidden field="Drive Rear Right Encoder"/>
+	<hidden field="Elevator Ultrasonic Graph"/>
+	<hidden field="Elevator Ultrasonic"/>
 </xml>

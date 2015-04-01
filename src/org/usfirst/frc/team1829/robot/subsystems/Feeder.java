@@ -19,7 +19,7 @@ public class Feeder extends Subsystem implements Cruisable
 	public Feeder()
 	{
 		super("Feeder");
-		feedMotor = new Talon(Robot.JAW_FEED_MOTOR);
+		feedMotor = new Talon(Robot.FEED_MOTOR);
 	}
 	
 	@Override
@@ -42,6 +42,8 @@ public class Feeder extends Subsystem implements Cruisable
 		{
 			speed = -1.0;
 		}
+		
+		speed = Robot.FEED_INVERTED ? -speed : speed;
 		feedMotor.set(speed);
 	}
 	
@@ -69,12 +71,17 @@ public class Feeder extends Subsystem implements Cruisable
 	{
 		if(this.cruiseSpeed > 0)
 		{
-			feedMotor.set(-this.cruiseSpeed);
+			feed(-this.cruiseSpeed);
 		}
 		else
 		{
-			feedMotor.set(this.cruiseSpeed);
+			feed(this.cruiseSpeed);
 		}
+	}
+	
+	public void stop()
+	{
+		feedMotor.stopMotor();
 	}
 
 	public void setCruiseSpeed(double speed) 

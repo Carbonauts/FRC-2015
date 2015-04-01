@@ -1,6 +1,7 @@
 package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.subsystems.Feeder;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -11,13 +12,16 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 public class FeedInCommand extends Command
 {
+	private boolean finished = false;
+	private Feeder feeder;
+	
 	/**
 	 * Default constructor
 	 */
 	public FeedInCommand()
 	{
 		super("JawFeedInCommand");
-		requires(Robot.getFeeder());
+		requires(feeder = Robot.getFeeder());
 	}
 	
 	/**
@@ -27,31 +31,32 @@ public class FeedInCommand extends Command
 	public FeedInCommand(double duration)
 	{
 		super("JawFeedInCommand", duration);
-		requires(Robot.getFeeder());
+		requires(feeder = Robot.getFeeder());
 	}
 	
 	@Override
 	protected void initialize() 
 	{
-		
+		finished = false;
+		feeder.feed(0.5);
 	}
 
 	@Override
 	protected void execute() 
 	{
-		
+		//Never finishes execution, must be interrupted or timed out.
 	}
 
 	@Override
 	protected boolean isFinished() 
 	{
-		return false;
+		return finished;
 	}
 
 	@Override
 	protected void end() 
 	{
-		
+		feeder.stop();
 	}
 
 	@Override
