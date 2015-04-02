@@ -23,19 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
 public class Jaw extends Subsystem implements Diagnosable, Cruisable
-{
-	/**
-	 * The reading of the analog sensor when the jaw
-	 * is fully extended.
-	 */
-	public static final int POS_EXTEND = 550;
-	
-	/**
-	 * The reading of the analog sensor when the jaw
-	 * is fully retracted.
-	 */
-	public static final int POS_RETRACT = 1300;
-	
+{	
 	/**
 	 * Motor that pushes and retracts the Jaw linkage
 	 * to compress the CONTAINER.
@@ -98,8 +86,8 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 		pidController = new PIDController(p, i, d, pidAdapter, pidAdapter);
 		extentLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_EXTENT);
 		retractLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_RETRACT);
-		extentSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_EXTENT, CarbonAnalogInput.SmoothingMode.AVERAGE, 16, 10);
-		containerSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_APPROACH);
+		extentSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_EXTENT, CarbonAnalogInput.SmoothingMode.MEDIAN, 16, 10);
+		containerSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_APPROACH, CarbonAnalogInput.SmoothingMode.MEDIAN, 8, 20);
 		
 		pidController.setOutputRange(-0.3, 0.3);
 	}
@@ -121,14 +109,14 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 		
 		speed = Robot.JAW_INVERTED ? -speed : speed;
 		
-		if(speed < 0)
+		if(speed < 0) //Extending
 		{
 			if(isFullyExtended()) //Safety for extending.
 			{
 				speed = 0.0;
 			}
 		}
-		else if(speed > 0)
+		else if(speed > 0) //Retracting
 		{
 			if(isFullyRetracted()) //Safety for retracting.
 			{
@@ -206,7 +194,7 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	 */
 	public double getExtent()
 	{
-		return extentSensor.getAverageSmoothedValue();
+		return extentSensor.getMedianSmoothedValue();
 	}
 	
 	/**
@@ -215,7 +203,7 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	 */
 	public double getContainerDistance()
 	{
-		return containerSensor.getRawValue();
+		return containerSensor.getMedianSmoothedValue();
 	}
 	
 	/**

@@ -6,7 +6,7 @@ import org.usfirst.frc.team1829.robot.subsystems.Conveyer;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
- * Stops the conveyor motor if it's in motion.
+ * Stops the conveyer motor if it's in motion.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
 public class ConveyerStopCommand extends Command
@@ -26,14 +26,14 @@ public class ConveyerStopCommand extends Command
 	@Override
 	protected void initialize() 
 	{
-		finished = false;
 		conveyer.stop();
+		finished = true;
 	}
 
 	@Override
 	protected void execute() 
 	{
-		//Never finishes execution.
+		//Finishes immediately
 	}
 
 	@Override

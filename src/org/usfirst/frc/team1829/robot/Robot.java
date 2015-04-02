@@ -127,6 +127,8 @@ public class Robot extends IterativeRobot
 	private FeedOutCommand feedOutCommand;
 	private FeedStopCommand feedStopCommand;
 	
+	private ContainerGrabCommand containerGrabCommand;
+	
 	//Operator Commands
 	private OperatorDriveCommand operatorDriveCommand;
 	private OperatorElevatorCommand operatorElevatorCommand;
@@ -157,9 +159,11 @@ public class Robot extends IterativeRobot
         jawExtendCommand = new JawExtendCommand();
         jawRetractCommand = new JawRetractCommand();
         jawStopCommand = new JawStopCommand();
-        feedInCommand = new FeedInCommand();
+        //feedInCommand = new FeedInCommand();
         feedOutCommand = new FeedOutCommand();
         feedStopCommand = new FeedStopCommand();
+        
+        containerGrabCommand = new ContainerGrabCommand();
         
         //Initialize Operator Commands
         operatorDriveCommand = new OperatorDriveCommand();
@@ -240,7 +244,6 @@ public class Robot extends IterativeRobot
     	//CONVEYER
     	if(getUI().getButtonState(UI_CONVEYER_IN)) //Conveyer-In Held
     	{
-    		System.out.println("Conveyer In Held!");
     		if(!conveyerInCommand.isRunning())
     		{
     			Scheduler.getInstance().add(conveyerInCommand);    			
@@ -248,18 +251,15 @@ public class Robot extends IterativeRobot
     	}
     	else if(getUI().getButtonState(UI_CONVEYER_OUT)) //Conveyer-Out Held
     	{
-    		System.out.println("Conveyer Out Held");
     		if(!conveyerOutCommand.isRunning())
     		{
-    			System.out.println("Launched Conveyer Out Command!");
     			Scheduler.getInstance().add(conveyerOutCommand);    			
     		}
     	}
     	else //Neither Conveyer button
     	{
-    		if(!conveyerStopCommand.isRunning())
+    		if(conveyerInCommand.isRunning() || conveyerOutCommand.isRunning())
     		{
-    			System.out.println("Launched Conveyer Stop Command!");
     			Scheduler.getInstance().add(conveyerStopCommand);    			
     		}
     	}
@@ -267,25 +267,21 @@ public class Robot extends IterativeRobot
     	//JAW
     	if(getUI().getButtonState(UI_JAW_EXTEND)) //Jaw extend button held
     	{
-    		System.out.println("Jaw Extend Button Held!");
-    		if(!jawExtendCommand.isRunning())
+    		if(!jawExtendCommand.isRunning()) //Don't interrupt self
     		{
-    			System.out.println("Launched Jaw Extend Command!");
     			Scheduler.getInstance().add(jawExtendCommand);
     		}
     	} 
     	else if(getUI().getButtonState(UI_JAW_RETRACT)) //Jaw retract button held
     	{
-    		System.out.println("Jaw Retract Button Held!");
-    		if(!jawRetractCommand.isRunning())
+    		if(!jawRetractCommand.isRunning()) //Don't interrupt self
     		{
-    			System.out.println("Launched Jaw Retract Command!");
     			Scheduler.getInstance().add(jawRetractCommand);
     		}
     	}
-    	else //Neither jaw button held
+    	else //Jaw has no active command
     	{
-    		if(/*!jawStopCommand.isRunning() &&*/ !operatorJawCommand.isRunning())
+    		if(carbonJaw.getCurrentCommand() == null)
     		{
     			Scheduler.getInstance().add(operatorJawCommand);
     		}
@@ -294,27 +290,22 @@ public class Robot extends IterativeRobot
     	//FEEDER
     	if(getUI().getButtonState(UI_FEED_IN)) //Feed-in button held
     	{
-    		System.out.println("Feed In Held!");
-    		if(!feedInCommand.isRunning())
+    		if(!containerGrabCommand.isRunning()) //Don't interrupt self
     		{
-    			System.out.println("Launched Feed In Command!");
-    			Scheduler.getInstance().add(feedInCommand);
+    			Scheduler.getInstance().add(containerGrabCommand);
     		}
     	}
     	else if(getUI().getButtonState(UI_FEED_OUT)) //Feed-out button held
     	{
-    		System.out.println("Feed Out Held!");
-    		if(!feedOutCommand.isRunning())
+    		if(!feedOutCommand.isRunning()) //Don't interrupt self
     		{
-    			System.out.println("Launched Feed Out Command!");
     			Scheduler.getInstance().add(feedOutCommand);    			
     		}
     	}
     	else
     	{
-    		if(!feedStopCommand.isRunning())
+    		if(containerGrabCommand.isRunning() || feedOutCommand.isRunning())
     		{    			
-    			System.out.println("Launched Feed Stop Command!");
     			Scheduler.getInstance().add(feedStopCommand);
     		}
     	}
@@ -325,6 +316,7 @@ public class Robot extends IterativeRobot
     	
         Scheduler.getInstance().run();
         updateSubsystemDSOutputs();
+        updateSubsystemDSInputs(); //TODO pay attention to test
     }
     
     /**
@@ -424,6 +416,7 @@ public class Robot extends IterativeRobot
     	feedback.append(carbonDrive.getStatus()).append(" ");
     	feedback.append(carbonTurret.getStatus()).append(" ");
     	feedback.append(carbonElevator.getStatus()).append(" ");
+    	feedback.append(carbonConveyer.getStatus()).append(" ");
     	feedback.append(carbonJaw.getStatus()).append(" ");
     	return feedback.toString();
 	}
@@ -434,5 +427,10 @@ public class Robot extends IterativeRobot
 		carbonTurret.updateSmartDS();
 		carbonElevator.updateSmartDS();
 		carbonJaw.updateSmartDS();
+	}
+	
+	public static void updateSubsystemDSInputs()
+	{
+		System.out.println(SmartDashboard.getString("Input string!"));
 	}
 }

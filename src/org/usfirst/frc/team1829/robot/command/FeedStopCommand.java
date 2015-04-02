@@ -19,15 +19,14 @@ public class FeedStopCommand extends Command
 	@Override
 	protected void initialize() 
 	{
-		finished = false;
 		feeder.stop();
+		finished = true;
 	}
 
 	@Override
 	protected void execute() 
 	{
-		//Never finishes execution.  This is to indicate
-		//That the feeder is in a stopped condition.
+		//Finishes immediately
 	}
 
 	@Override

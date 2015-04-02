@@ -191,18 +191,28 @@ public class Elevator extends Subsystem implements Diagnosable
 	 */
 	public void setPower(double power)
 	{		
-		if(power > 0 && !isAtTop())
+		power = (power > 1.0) ? 1.0 : power; //Speed top cap
+		power = (power < -1.0) ? -1.0 : power; //Speed bottom cap
+		
+		power = Robot.ELEVATOR_INVERTED ? -power : power;
+		
+		if(power < 0) //Going up
 		{
-			motor.set(-power);
+			if(isAtTop()) //Safety for going up.
+			{
+				power = 0.0;
+			}
 		}
-		else if(power < 0 && !isAtBottom())
+		else if(power > 0) //Going down
 		{
-			motor.set(-power);
+			if(isAtBottom()) //Safety for going down.
+			{
+				power = 0.0;
+			}
 		}
-		else
-		{
-			motor.stopMotor();
-		}
+		
+		motor.set(power);
+		lastOperation = "moveElevator(" + power + ")";
 	}
 	
 	/**
@@ -258,16 +268,22 @@ public class Elevator extends Subsystem implements Diagnosable
 		{
 		case AUTO:
 			toReturn = AUTO_POSITION;
+			break;
 		case LEVEL1:
 			toReturn = LEVEL1_POSITION;
+			break;
 		case LEVEL2:
 			toReturn = LEVEL2_POSITION;
+			break;
 		case LEVEL3:
 			toReturn = LEVEL3_POSITION;
+			break;
 		case LEVEL4:
 			toReturn = LEVEL4_POSITION;
+			break;
 		case LEVEL5:
 			toReturn = LEVEL5_POSITION;
+			break;
 		default:
 			break;
 		}

@@ -22,14 +22,14 @@ public class JawStopCommand extends Command
 	@Override
 	protected void initialize() 
 	{
-		finished = false;
 		jaw.stop();
+		finished = true;
 	}
 
 	@Override
 	protected void execute() 
 	{
-		//Never stops execution
+		//Finishes immediately
 	}
 
 	@Override

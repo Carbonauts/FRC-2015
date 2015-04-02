@@ -99,6 +99,11 @@
 		<height>280</height>
 		<property name="Buffer Size (samples)" value="100"/>
 	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="10" y="38"/>
+		<width>192</width>
+		<height>65</height>
+	</static-widget>
 </dashboard>
 <live-window>
 </live-window>
