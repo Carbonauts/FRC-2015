@@ -2,12 +2,12 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import java.text.DecimalFormat;
 
-import org.usfirst.frc.team1829.robot.CarbonTalon;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.command.OperatorElevatorCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonAnalogInput;
+import com.team1829.library.CarbonTalon;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;

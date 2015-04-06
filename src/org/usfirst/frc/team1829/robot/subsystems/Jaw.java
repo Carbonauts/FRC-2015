@@ -2,7 +2,6 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import java.text.DecimalFormat;
 
-import org.usfirst.frc.team1829.robot.CarbonTalon;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.command.OperatorJawCommand;
 import org.usfirst.frc.team1829.robot.util.Cruisable;
@@ -10,6 +9,7 @@ import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonAnalogInput;
 import com.team1829.library.CarbonDigitalInput;
+import com.team1829.library.CarbonTalon;
 
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;

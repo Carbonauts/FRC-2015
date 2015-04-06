@@ -171,9 +171,7 @@ public class Robot extends IterativeRobot
      */
     public void autonomousInit() 
     {
-    	/*Scheduler.getInstance().add(feedInCommand);
-    	Scheduler.getInstance().add(conveyerInCommand);*/
-    	//Scheduler.getInstance().add(lineCommand);
+    	
     }
 
     /**

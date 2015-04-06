@@ -4,12 +4,12 @@ import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.usfirst.frc.team1829.robot.CarbonCANTalon;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.command.OperatorDriveCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonAnalogInput;
+import com.team1829.library.CarbonCANTalon;
 
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.RobotDrive;

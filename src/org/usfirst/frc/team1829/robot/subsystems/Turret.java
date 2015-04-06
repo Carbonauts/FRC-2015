@@ -4,12 +4,12 @@ import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.usfirst.frc.team1829.robot.CarbonTalon;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.command.OperatorTurretCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonDigitalInput;
+import com.team1829.library.CarbonTalon;
 import com.team1829.library.LatchBoolean;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
