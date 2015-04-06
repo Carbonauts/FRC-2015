@@ -27,4 +27,6 @@ public interface Diagnosable
 	 * object did.
 	 */
 	String lastOperation();
+	
+	String getDIOFeedback();
 }

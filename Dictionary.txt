@@ -9,3 +9,5 @@ smartdashboard
 setpoint
 teleop
 dashboard
+arduino
+solenoid

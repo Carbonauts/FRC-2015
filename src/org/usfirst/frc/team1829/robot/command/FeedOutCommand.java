@@ -38,7 +38,7 @@ public class FeedOutCommand extends Command
 	protected void initialize() 
 	{
 		finished = false;
-		feeder.feed(-0.3);
+		feeder.set(-0.3);
 	}
 
 	@Override

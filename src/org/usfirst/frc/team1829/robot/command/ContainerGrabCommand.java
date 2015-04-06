@@ -38,11 +38,11 @@ public class ContainerGrabCommand extends Command
 		
 		if(!containerUpFlag)
 		{
-			feeder.feed(0.5);
+			feeder.set(0.5);
 		}
 		else
 		{
-			feeder.feed(0.2);
+			feeder.set(0.2);
 			jaw.retract();
 			
 			if(jaw.isFullyRetracted())

@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.usfirst.frc.team1829.robot.CarbonCANTalon;
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.command.OperatorDriveCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
@@ -26,22 +27,22 @@ public class Drive extends Subsystem implements Diagnosable
 	/**
 	 * Front-left drive motor as a Talon.
 	 */
-	private CANTalon motorLeftMaster;
+	private CarbonCANTalon motorLeftMaster;
 	
 	/**
 	 * Rear-left drive motor as a Talon.
 	 */
-	private CANTalon motorLeftSlave;
+	//private CarbonCANTalon motorLeftSlave;
 	
 	/**
 	 * Front-right drive motor as a Talon.
 	 */
-	private CANTalon motorRightMaster;
+	private CarbonCANTalon motorRightMaster;
 	
 	/**
 	 * Rear-right drive motor as a Talon.
 	 */
-	private CANTalon motorRightSlave;
+	//private CarbonCANTalon motorRightSlave;
 	
 	/**
 	 * RobotDrive object.
@@ -74,14 +75,6 @@ public class Drive extends Subsystem implements Diagnosable
 	private double driveD = 0;
 	
 	/**
-	 * Max rate that the drive system will change speed at.
-	 * Measured in volts/second of change.  This is only
-	 * active in a closed-loop control mode, such as Speed
-	 * or Position.
-	 */
-	private double driveRampRate = 3.0;
-	
-	/**
 	 * The last operation the drive subsystem did.
 	 */
 	private String lastOperation = "";
@@ -93,10 +86,13 @@ public class Drive extends Subsystem implements Diagnosable
 	{
 		super("Drive");
 		
-		motorLeftMaster = new CANTalon(Robot.DRIVE_FRONT_LEFT);
-		motorLeftSlave = new CANTalon(Robot.DRIVE_REAR_LEFT);
-		motorRightMaster = new CANTalon(Robot.DRIVE_FRONT_RIGHT);
-		motorRightSlave = new CANTalon(Robot.DRIVE_REAR_RIGHT);
+		motorLeftMaster = new CarbonCANTalon(Robot.DRIVE_FRONT_LEFT, 0.1, 30);
+		//motorLeftSlave = new CarbonCANTalon(Robot.DRIVE_REAR_LEFT);
+		motorRightMaster = new CarbonCANTalon(Robot.DRIVE_FRONT_RIGHT, 0.1, 30);
+		//motorRightSlave = new CarbonCANTalon(Robot.DRIVE_REAR_RIGHT);
+		
+		motorLeftMaster.setRampEnabled(false);
+		motorRightMaster.setRampEnabled(false);
 		
 		lineFollower = new CarbonAnalogInput(Robot.DRIVE_LINE, CarbonAnalogInput.SmoothingMode.AVERAGE, 5, 20);
 		driveUpkeepTimer = new Timer();
@@ -106,16 +102,16 @@ public class Drive extends Subsystem implements Diagnosable
 		 * that updates the drive ramp based on the height of
 		 * the elevator.
 		 */
-		driveUpkeepTimer.schedule(new DampeningTask(), 0L, 100);
+		//driveUpkeepTimer.schedule(new DampeningTask(), 0L, 100);
 		
-		motorLeftSlave.changeControlMode(CANTalon.ControlMode.Follower);
+		/*motorLeftSlave.changeControlMode(CANTalon.ControlMode.Follower);
 		motorLeftSlave.set(motorLeftMaster.getDeviceID());
 		
 		motorRightSlave.changeControlMode(CANTalon.ControlMode.Follower);
-		motorRightSlave.set(motorRightMaster.getDeviceID());
+		motorRightSlave.set(motorRightMaster.getDeviceID());*/
 		
-		motorLeftMaster.setCloseLoopRampRate(3.0); //Sets the motor to change at a max of X Volts/sec
-		motorRightMaster.setCloseLoopRampRate(3.0);
+		/*motorLeftMaster.setCloseLoopRampRate(3.0); //Sets the motor to change at a max of X Volts/sec
+		motorRightMaster.setCloseLoopRampRate(3.0);*/
 		
 		setDriveMode(CANTalon.ControlMode.PercentVbus);
 		setBrakeMode(true);
@@ -131,7 +127,7 @@ public class Drive extends Subsystem implements Diagnosable
 	 * Usually the default drive Command reads operator
 	 * input.
 	 */
-	protected void initDefaultCommand() 
+	protected void initDefaultCommand()
 	{
 		setDefaultCommand(new OperatorDriveCommand());
 	}
@@ -163,7 +159,7 @@ public class Drive extends Subsystem implements Diagnosable
 	{
 		//Invert direction based on Robot constants.
 		y = Robot.DRIVE_Y_INVERTED ? -y : y;
-		x = Robot.DRIVE_X_INVERTED ? -x : x;
+		x = Robot.DRIVE_R_INVERTED ? -x : x;
 		driveTrain.arcadeDrive(y, x);
 		lastOperation = "driveArcade(" + formatter.format(y) + ", " + formatter.format(x) + ")";
 	}
@@ -200,9 +196,9 @@ public class Drive extends Subsystem implements Diagnosable
 	public void setBrakeMode(boolean brake)
 	{
 		motorLeftMaster.enableBrakeMode(brake);
-		motorLeftSlave.enableBrakeMode(brake);
+		//motorLeftSlave.enableBrakeMode(brake);
 		motorRightMaster.enableBrakeMode(brake);
-		motorRightSlave.enableBrakeMode(brake);
+		//motorRightSlave.enableBrakeMode(brake);
 		lastOperation = "setBrakeMode(" + (brake ? "T" : "F") + ")";
 	}
 
@@ -241,6 +237,11 @@ public class Drive extends Subsystem implements Diagnosable
 		return lastOperation;
 	}
 	
+	public String getDIOFeedback()
+	{
+		return "";
+	}
+	
 	/**
 	 * Task that runs periodically to update the speed
 	 * ramp on the Talon SRXs based on the current value
@@ -255,8 +256,8 @@ public class Drive extends Subsystem implements Diagnosable
 		public void run() 
 		{
 			//TODO make fancy calculation that dampens ramp based on elevator.
-			motorLeftMaster.setCloseLoopRampRate(driveRampRate);
-			motorRightMaster.setCloseLoopRampRate(driveRampRate);
+			/*motorLeftMaster.setCloseLoopRampRate(driveRampRate);
+			motorRightMaster.setCloseLoopRampRate(driveRampRate);*/
 		}	
 	}
 }

@@ -73,7 +73,7 @@ public class DriveOnLineCommand extends Command
 	protected void execute() 
 	{
 		System.out.print("Following Line!");
-		drive.driveArcade(0.6, -latestOutput);
+		drive.driveArcade(Robot.getUI().getAxisData(Robot.UI_DRIVE_Y), -latestOutput);
 		System.out.println("LatestOutput: " + latestOutput);
 	}
 

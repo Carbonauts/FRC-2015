@@ -38,7 +38,15 @@ public class OperatorJawCommand extends Command
 	@Override
 	protected void execute() 
 	{
-		jaw.move(Robot.getUI().getAxisData(Robot.UI_JAW_AXIS));
+		if(Robot.getUI().getButtonState(Robot.UI_JAW_AXIS_ENABLE))
+		{
+			jaw.set(Robot.getUI().getAxisData(Robot.UI_JAW_AXIS));			
+		}
+		else
+		{
+			System.out.println("JAW stop");
+			jaw.set(0.0);
+		}
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package org.usfirst.frc.team1829.robot.command;
 
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.subsystems.Feeder;
-import org.usfirst.frc.team1829.robot.subsystems.Jaw;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -14,7 +13,6 @@ import edu.wpi.first.wpilibj.command.Command;
 public class FeedInCommand extends Command
 {
 	private boolean finished = false;
-	private Jaw jaw;
 	private Feeder feeder;
 	
 	private double speed;
@@ -24,10 +22,9 @@ public class FeedInCommand extends Command
 	 */
 	public FeedInCommand(double speed)
 	{
-		super("JawFeedInCommand");
+		super("FeedInCommand");
 		requires(feeder = Robot.getFeeder());
-		jaw = Robot.getJaw();
-		this.speed = speed;
+		this.speed = speed > 0 ? speed : -speed;
 	}
 	
 	/**
@@ -36,10 +33,9 @@ public class FeedInCommand extends Command
 	 */
 	public FeedInCommand(double speed, double duration)
 	{
-		super("JawFeedInCommand", duration);
+		super("FeedInCommand", duration);
 		requires(feeder = Robot.getFeeder());
-		jaw = Robot.getJaw();
-		this.speed = speed;
+		this.speed = speed > 0 ? speed : -speed;
 	}
 	
 	@Override
@@ -51,7 +47,7 @@ public class FeedInCommand extends Command
 	@Override
 	protected void execute() 
 	{
-		feeder.feed(speed);
+		feeder.set(speed);
 	}
 
 	@Override

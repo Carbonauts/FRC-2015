@@ -1,11 +1,29 @@
 <xml version="1.0">
 <dashboard>
+	<widget field="LastMovementPerpendicular" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="346"/>
+	</widget>
+	<widget field="Turret Sensor" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="1226" y="424"/>
+		<width>121</width>
+		<height>45</height>
+	</widget>
+	<widget field="DIO Feedback" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="48" y="463"/>
+		<width>428</width>
+	</widget>
+	<widget field="Elevator Ultrasonic" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="125"/>
+	</widget>
+	<widget field="Elevator Ultrasonic Graph" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="0" y="104"/>
+	</widget>
 	<widget field="Jaw Retracted" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
 		<location x="743" y="470"/>
 		<height>101</height>
 	</widget>
 	<widget field="Jaw Extended" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="741" y="342"/>
+		<location x="741" y="343"/>
 		<height>99</height>
 	</widget>
 	<widget field="Jaw Last Operation" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
@@ -107,8 +125,4 @@
 </dashboard>
 <live-window>
 </live-window>
-	<hidden field="Drive Rear Left Encoder"/>
-	<hidden field="Drive Rear Right Encoder"/>
-	<hidden field="Elevator Ultrasonic Graph"/>
-	<hidden field="Elevator Ultrasonic"/>
 </xml>

@@ -2,7 +2,9 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import java.text.DecimalFormat;
 
+import org.usfirst.frc.team1829.robot.CarbonTalon;
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.command.OperatorJawCommand;
 import org.usfirst.frc.team1829.robot.util.Cruisable;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
@@ -12,7 +14,6 @@ import com.team1829.library.CarbonDigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -24,11 +25,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Jaw extends Subsystem implements Diagnosable, Cruisable
 {	
+	public static final double MAX_SPEED = 0.5;
+	
 	/**
 	 * Motor that pushes and retracts the Jaw linkage
 	 * to compress the CONTAINER.
 	 */
-	private Talon motor;
+	private CarbonTalon motor;
 	
 	private CarbonDigitalInput extentLimit;
 	
@@ -81,9 +84,12 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	public Jaw()
 	{
 		super("Jaw");
-		motor = new Talon(Robot.JAW_MOTOR);
+		motor = new CarbonTalon(Robot.JAW_MOTOR, 0.025, 20);
+		motor.setRampEnabled(true);
+		
 		pidAdapter = new JawPIDAdapter();
 		pidController = new PIDController(p, i, d, pidAdapter, pidAdapter);
+		
 		extentLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_EXTENT);
 		retractLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_RETRACT);
 		extentSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_EXTENT, CarbonAnalogInput.SmoothingMode.MEDIAN, 16, 10);
@@ -95,17 +101,17 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	@Override
 	protected void initDefaultCommand() 
 	{
-		
+		this.setDefaultCommand(new OperatorJawCommand());;
 	}
 	
 	/**
 	 * Actuates the jaw at the given speed.
 	 * @param speed
 	 */
-	public void move(double speed)
+	public void set(double speed)
 	{
-		speed = (speed > 1.0) ? 1.0 : speed; //Speed top cap
-		speed = (speed < -1.0) ? -1.0 : speed; //Speed bottom cap
+		speed = (speed > MAX_SPEED) ? MAX_SPEED : speed; //Speed top cap
+		speed = (speed < -MAX_SPEED) ? -MAX_SPEED : speed; //Speed bottom cap
 		
 		speed = Robot.JAW_INVERTED ? -speed : speed;
 		
@@ -135,7 +141,7 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	{
 		if(!isFullyRetracted())
 		{
-			move(getCruiseSpeed());
+			set(getCruiseSpeed());
 			lastOperation = "retract()";
 		}
 		else
@@ -151,7 +157,7 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	{
 		if(!isFullyExtended())
 		{
-			move(-getCruiseSpeed());
+			set(-getCruiseSpeed());
 			lastOperation = "extend()";
 		}
 		else
@@ -259,7 +265,7 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 		{
 			if(pidEnabled)
 			{
-				move(output);
+				set(output);
 			}
 		}
 
@@ -325,5 +331,13 @@ public class Jaw extends Subsystem implements Diagnosable, Cruisable
 	public String lastOperation() 
 	{	
 		return lastOperation;
+	}
+	
+	public String getDIOFeedback()
+	{
+		StringBuffer feedback = new StringBuffer();
+		feedback.append(extentLimit.getChannel()).append(":").append(isFullyExtended() ? "T" : "F").append(" ");
+		feedback.append(retractLimit.getChannel()).append(":").append(isFullyRetracted() ? "T" : "F").append(" ");
+		return feedback.toString();
 	}
 }

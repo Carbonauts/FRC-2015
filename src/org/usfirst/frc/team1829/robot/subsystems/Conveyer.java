@@ -47,7 +47,7 @@ public class Conveyer extends Subsystem implements Diagnosable, Cruisable
 	 */
 	public void rollIn()
 	{
-		setPower(this.cruiseSpeed);
+		set(this.cruiseSpeed);
 		lastOperation = "rollIn()";
 	}
 	
@@ -56,7 +56,7 @@ public class Conveyer extends Subsystem implements Diagnosable, Cruisable
 	 */
 	public void rollOut()
 	{
-		setPower(-this.cruiseSpeed);
+		set(-this.cruiseSpeed);
 		lastOperation = "rollIn()";
 	}
 	
@@ -73,7 +73,7 @@ public class Conveyer extends Subsystem implements Diagnosable, Cruisable
 	 * Directly sets the speed of the conveyer motor.
 	 * @param speed The speed of the motor, from [-1, 1]
 	 */
-	public void setPower(double speed)
+	public void set(double speed)
 	{
 		if(speed > 1.0)
 		{
@@ -127,5 +127,10 @@ public class Conveyer extends Subsystem implements Diagnosable, Cruisable
 	public String lastOperation() 
 	{	
 		return lastOperation;
+	}
+	
+	public String getDIOFeedback()
+	{
+		return "";
 	}
 }

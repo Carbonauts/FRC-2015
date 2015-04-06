@@ -2,11 +2,12 @@ package org.usfirst.frc.team1829.robot.subsystems;
 
 import org.usfirst.frc.team1829.robot.Robot;
 import org.usfirst.frc.team1829.robot.util.Cruisable;
+import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
-public class Feeder extends Subsystem implements Cruisable
+public class Feeder extends Subsystem implements Diagnosable, Cruisable
 {
 	/**
 	 * Motor that drives the gripping rollers that move
@@ -32,7 +33,7 @@ public class Feeder extends Subsystem implements Cruisable
 	 * Sets the feeders to roll at the specified speed.
 	 * @param speed
 	 */
-	public void feed(double speed)
+	public void set(double speed)
 	{
 		if(speed > 1.0)
 		{
@@ -55,11 +56,11 @@ public class Feeder extends Subsystem implements Cruisable
 	{
 		if(cruiseSpeed > 0)
 		{
-			feed(this.cruiseSpeed);
+			set(this.cruiseSpeed);
 		}
 		else
 		{
-			feed(-this.cruiseSpeed);
+			set(-this.cruiseSpeed);
 		}
 	}
 	
@@ -71,11 +72,11 @@ public class Feeder extends Subsystem implements Cruisable
 	{
 		if(this.cruiseSpeed > 0)
 		{
-			feed(-this.cruiseSpeed);
+			set(-this.cruiseSpeed);
 		}
 		else
 		{
-			feed(this.cruiseSpeed);
+			set(this.cruiseSpeed);
 		}
 	}
 	
@@ -92,5 +93,25 @@ public class Feeder extends Subsystem implements Cruisable
 	public double getCruiseSpeed() 
 	{	
 		return this.cruiseSpeed;
+	}
+
+	public String getStatus() 
+	{	
+		return null;
+	}
+
+	public void updateSmartDS() 
+	{
+		
+	}
+
+	public String lastOperation() 
+	{
+		return null;
+	}
+
+	public String getDIOFeedback() 
+	{	
+		return null;
 	}
 }
