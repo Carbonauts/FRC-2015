@@ -32,8 +32,8 @@ public class OperatorDriveCommand extends Command
 	@Override
 	protected void execute() 
 	{
-		drive.driveArcade(Robot.getUI().getAxisData(Robot.UI_DRIVE_Y), 
-						  Robot.getUI().getAxisData(Robot.UI_DRIVE_R));
+		drive.driveArcade(-Robot.getUI().getAxisData(Robot.UI_DRIVE_Y), 
+						  -Robot.getUI().getAxisData(Robot.UI_DRIVE_R));
 	}
 
 	@Override

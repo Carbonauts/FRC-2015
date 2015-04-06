@@ -3,15 +3,16 @@ package org.usfirst.frc.team1829.robot.subsystems;
 import java.text.DecimalFormat;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.command.OperatorElevatorCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonAnalogInput;
+import com.team1829.library.CarbonTalon;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -23,6 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Elevator extends Subsystem implements Diagnosable
 {
+	public static final double MAX_SPEED = 0.5;
+	
 	DecimalFormat formatter = new DecimalFormat("000.00");
 	
 	/*
@@ -51,7 +54,7 @@ public class Elevator extends Subsystem implements Diagnosable
 	 * The Talon motor controller that we use for this
 	 * subsystem.
 	 */
-	private Talon motor;
+	private CarbonTalon motor;
 	
 	/**
 	 * The ultrasonic attached to the subsystem to provide
@@ -99,7 +102,8 @@ public class Elevator extends Subsystem implements Diagnosable
 	{
 		super("Elevator");
 		
-		motor = new Talon(Robot.ELEVATOR_MOTOR);
+		motor = new CarbonTalon(Robot.ELEVATOR_MOTOR, 0.025, 50);
+		motor.setRampEnabled(true);
 		ultrasonic = new CarbonAnalogInput(Robot.ELEVATOR_ULTRA, CarbonAnalogInput.SmoothingMode.AVERAGE, 8, 20);
 		topLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_TOP);
 		botLimit = new DigitalInput(Robot.ELEVATOR_LIMIT_BOT);
@@ -120,7 +124,7 @@ public class Elevator extends Subsystem implements Diagnosable
 	@Override
 	protected void initDefaultCommand() 
 	{
-		//TODO Initialize a default command for this subsystem.
+		this.setDefaultCommand(new OperatorElevatorCommand());
 	}
 	
 	/**
@@ -184,25 +188,35 @@ public class Elevator extends Subsystem implements Diagnosable
 	}
 	
 	/**
-	 * Sets the motor power with no PID calculations.
+	 * Sets the motor power.  If being used manually,
+	 * be sure to call setPIDEnabled(false) or you will
+	 * conflict with the PID control.
 	 * @param power
 	 */
-	public void setAbsolutePower(double power)
-	{
-		setPIDEnabled(false);
+	public void set(double power)
+	{		
+		power = (power > MAX_SPEED) ? MAX_SPEED : power; //Speed top cap
+		power = (power < -MAX_SPEED) ? -MAX_SPEED : power; //Speed bottom cap
 		
-		if(power > 0 && !isAtTop())
+		power = Robot.ELEVATOR_INVERTED ? -power : power;
+		
+		if(power < 0) //Going up
 		{
-			motor.set(-power);
+			if(isAtTop()) //Safety for going up.
+			{
+				power = 0.0;
+			}
 		}
-		else if(power < 0 && !isAtBottom())
+		else if(power > 0) //Going down
 		{
-			motor.set(-power);
+			if(isAtBottom()) //Safety for going down.
+			{
+				power = 0.0;
+			}
 		}
-		else
-		{
-			motor.stopMotor();
-		}
+		
+		motor.set(power);
+		lastOperation = "moveElevator(" + power + ")";
 	}
 	
 	/**
@@ -239,6 +253,10 @@ public class Elevator extends Subsystem implements Diagnosable
 		{
 			pidController.enable();
 		}
+		else
+		{
+			motor.stopMotor();
+		}
 		lastOperation = "setPIDEnabled(" + enabled + ")";
 	}
 	
@@ -254,16 +272,22 @@ public class Elevator extends Subsystem implements Diagnosable
 		{
 		case AUTO:
 			toReturn = AUTO_POSITION;
+			break;
 		case LEVEL1:
 			toReturn = LEVEL1_POSITION;
+			break;
 		case LEVEL2:
 			toReturn = LEVEL2_POSITION;
+			break;
 		case LEVEL3:
 			toReturn = LEVEL3_POSITION;
+			break;
 		case LEVEL4:
 			toReturn = LEVEL4_POSITION;
+			break;
 		case LEVEL5:
 			toReturn = LEVEL5_POSITION;
+			break;
 		default:
 			break;
 		}
@@ -283,18 +307,7 @@ public class Elevator extends Subsystem implements Diagnosable
 		{
 			if(pidEnabled)
 			{
-				if(output > 0 && !isAtTop())
-				{
-					motor.set(-output);
-				}
-				else if (output < 0 && !isAtBottom())
-				{
-					motor.set(-output);
-				}
-				else
-				{
-					motor.stopMotor();
-				}
+				set(output);
 			}
 		}
 
@@ -311,15 +324,14 @@ public class Elevator extends Subsystem implements Diagnosable
 	 * Returns a string representation of the status of this
 	 * subsystem.
 	 */
-	public String getFeedback() 
+	public String getStatus() 
 	{	
 		StringBuffer feedback = new StringBuffer("");
 		feedback.append("[" + getName() + "]");
 		DecimalFormat ultraFormat = new DecimalFormat("0000.00");
-		feedback.append(" Ultra-Smoothed:").append(ultraFormat.format(ultrasonic.getAverageSmoothedValue()));
-		feedback.append(" Ultra-Raw:").append(ultraFormat.format(ultrasonic.getRawValue()));
-		feedback.append(" TopLimit:").append(isAtTop() ? "T" : "F");
-		feedback.append(" BotLimit:").append(isAtBottom() ? "T" : "F");
+		feedback.append(" Ultra:").append(ultraFormat.format(ultrasonic.getAverageSmoothedValue()));
+		feedback.append(" TopLim:").append(isAtTop() ? "T" : "F");
+		feedback.append(" BotLim:").append(isAtBottom() ? "T" : "F");
 		return feedback.toString();
 	}
 	
@@ -345,5 +357,13 @@ public class Elevator extends Subsystem implements Diagnosable
 	public String lastOperation() 
 	{	
 		return lastOperation;
+	}
+	
+	public String getDIOFeedback()
+	{
+		StringBuffer feedback = new StringBuffer();
+		feedback.append(topLimit.getChannel()).append(":").append(isAtTop() ? "T" : "F").append(" ");
+		feedback.append(botLimit.getChannel()).append(":").append(isAtBottom() ? "T" : "F").append(" ");
+		return feedback.toString();
 	}
 }

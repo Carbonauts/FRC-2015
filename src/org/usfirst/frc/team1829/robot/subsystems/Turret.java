@@ -1,13 +1,17 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
 import java.text.DecimalFormat;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.command.OperatorTurretCommand;
 import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
 import com.team1829.library.CarbonDigitalInput;
+import com.team1829.library.CarbonTalon;
+import com.team1829.library.LatchBoolean;
 
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -18,34 +22,41 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Turret extends Subsystem implements Diagnosable
 {
+	public static final double MAX_SPEED = 0.5;
+	
 	DecimalFormat formatter = new DecimalFormat("000.00");
 	
 	/**
 	 * Motor for this subsystem.
 	 */
-	private Talon turretMotor;
+	private CarbonTalon motor;
 	
 	/**
 	 * Limit switch that triggers when the turret
 	 * is aligned parallel to the drive train of
 	 * the robot.
 	 */
-	private CarbonDigitalInput parallelLimit;
+	private CarbonDigitalInput turnLimit;
 	
-	/**
-	 * Limit switch that triggers when the turret
-	 * is aligned perpendicularly to the drive train
-	 * of the robot.
-	 */
-	private CarbonDigitalInput perpendicularLimit;
+	private Timer directionTimer;
+	
+	private LatchBoolean limitLatch;
+	
+	private boolean parallel = false;
+	
+	private boolean perpendicular = false;
 	
 	/**
 	 * The default speed that methods in this subsystem
 	 * cause the motor to turn at.
 	 */
-	private double cruiseSpeed = 0.6;
+	private double cruiseSpeed = 0.4;
 	
 	private String lastOperation = "";
+	
+	private boolean lastMovementPerpendicular = false;
+	
+	private boolean lastMovementParallel = false;
 	
 	/**
 	 * Default turret constructor.
@@ -53,9 +64,16 @@ public class Turret extends Subsystem implements Diagnosable
 	public Turret()
 	{
 		super("Turret");
-		turretMotor = new Talon(Robot.TURRET_MOTOR);
-		parallelLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PARALLEL, false);
-		perpendicularLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT_PERPENDICULAR, false);
+		motor = new CarbonTalon(Robot.TURRET_MOTOR, 0.025, 50);
+		motor.setRampEnabled(true);
+		turnLimit = new CarbonDigitalInput(Robot.TURRET_LIMIT, false);
+		directionTimer = new Timer();
+		limitLatch = new LatchBoolean();
+		
+		parallel = true;
+		perpendicular = false;
+		
+		directionTimer.schedule(new LimitTask(), 0, 20);
 		
 		lastOperation = "Turret() constructed";
 	}
@@ -63,7 +81,7 @@ public class Turret extends Subsystem implements Diagnosable
 	@Override
 	protected void initDefaultCommand() 
 	{
-		
+		this.setDefaultCommand(new OperatorTurretCommand());
 	}
 	
 	/**
@@ -73,7 +91,7 @@ public class Turret extends Subsystem implements Diagnosable
 	 */
 	public boolean isParallel()
 	{
-		return !parallelLimit.get();
+		return parallel;
 	}
 	
 	/**
@@ -83,24 +101,30 @@ public class Turret extends Subsystem implements Diagnosable
 	 */
 	public boolean isPerpendicular()
 	{
-		return !perpendicularLimit.get();
+		return perpendicular;
 	}
 	
 	/**
 	 * Sets the power for the turret motor.
 	 * @param power The power for the turret motor.
 	 */
-	public void setPower(double power)
+	public void set(double power)
 	{
-		if(power > 1.0)
+		power = (power > MAX_SPEED) ? MAX_SPEED : power;
+		power = (power < -MAX_SPEED) ? -MAX_SPEED : power;
+		
+		power = Robot.TURRET_INVERTED ? -power : power;
+		System.out.println("Power=" + power);
+		/*if(power > 0 && isParallel())
 		{
-			power = 1.0;
+			power = 0;
 		}
-		else if(power < -1.0)
+		if(power < 0 && isPerpendicular())
 		{
-			power = -1.0;
-		}
-		turretMotor.set(power);
+			power = 0;
+		}*/
+		
+		motor.set(power);
 		lastOperation = "setPower(" + formatter.format(power) + ")";
 	}
 	
@@ -112,7 +136,7 @@ public class Turret extends Subsystem implements Diagnosable
 	{
 		if(!isParallel())
 		{			
-			setPower(cruiseSpeed);
+			set(cruiseSpeed);
 		}
 		lastOperation = "turnParallel()";
 	}
@@ -125,7 +149,7 @@ public class Turret extends Subsystem implements Diagnosable
 	{
 		if(!isPerpendicular())
 		{
-			setPower(-cruiseSpeed);			
+			set(-cruiseSpeed);			
 		}
 		lastOperation = "turnPerpendicular()";
 	}
@@ -135,7 +159,7 @@ public class Turret extends Subsystem implements Diagnosable
 	 */
 	public void stop()
 	{
-		turretMotor.stopMotor();
+		motor.stopMotor();
 		lastOperation = "stop()";
 	}
 	
@@ -156,11 +180,12 @@ public class Turret extends Subsystem implements Diagnosable
 		lastOperation = "setCruiseSpeed(" + formatter.format(speed) + ")";
 	}
 
-	public String getFeedback() 
+	public String getStatus() 
 	{	
-		StringBuffer feedback = new StringBuffer("");
-		feedback.append("[" + getName() + "] ParaLimit:").append(isParallel() ? "T" : "F");
-		feedback.append(" PerpLimit:").append(isPerpendicular() ? "T" : "F");
+		StringBuffer feedback = new StringBuffer("[" + getName() + "]");
+		feedback.append(" ParaLim:").append(isParallel() ? "T" : "F");
+		feedback.append(" PerpLim:").append(isPerpendicular() ? "T" : "F");
+		feedback.append(" LastMovementPerpendicular:").append(lastMovementPerpendicular);
 		return feedback.toString();
 	}
 	
@@ -169,10 +194,38 @@ public class Turret extends Subsystem implements Diagnosable
 		SmartDashboard.putBoolean("Turret Parallel Lmiit", isParallel());
 		SmartDashboard.putBoolean("Turret Perpendicular Limit", isPerpendicular());
 		SmartDashboard.putString("Turret Last Operation", lastOperation());
+		SmartDashboard.putBoolean("Turret Sensor", !turnLimit.get());
+		SmartDashboard.putBoolean("LastMovementPerpendicular", lastMovementPerpendicular);
 	}
 
 	public String lastOperation() 
 	{	
 		return lastOperation;
+	}
+	
+	public String getDIOFeedback()
+	{
+		StringBuffer feedback = new StringBuffer();
+		feedback.append(turnLimit.getChannel()).append(":").append(isParallel() ? "T" : "F").append(" ");
+		return feedback.toString();
+	}
+	
+	public class LimitTask extends TimerTask
+	{
+		@Override
+		public void run() 
+		{
+			if(limitLatch.onTrue(!turnLimit.get()))
+			{
+				lastMovementPerpendicular = motor.get() > 0;
+				parallel = !lastMovementPerpendicular;
+				perpendicular = lastMovementPerpendicular;
+			}
+			else if(limitLatch.onFalse(!turnLimit.get()))
+			{
+				parallel = false;
+				perpendicular = false;
+			}
+		}
 	}
 }

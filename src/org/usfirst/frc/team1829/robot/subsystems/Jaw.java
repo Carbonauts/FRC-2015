@@ -1,13 +1,21 @@
 package org.usfirst.frc.team1829.robot.subsystems;
 
+import java.text.DecimalFormat;
+
 import org.usfirst.frc.team1829.robot.Robot;
+import org.usfirst.frc.team1829.robot.command.OperatorJawCommand;
 import org.usfirst.frc.team1829.robot.util.Cruisable;
+import org.usfirst.frc.team1829.robot.util.Diagnosable;
 
-import com.team1829.library.LatchBoolean;
+import com.team1829.library.CarbonAnalogInput;
+import com.team1829.library.CarbonDigitalInput;
+import com.team1829.library.CarbonTalon;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * Subsystem that grabs CONTAINERS and places them on the
@@ -15,151 +23,115 @@ import edu.wpi.first.wpilibj.command.Subsystem;
  * deposits them on a tote.
  * @author Nick Mosher, Team 1829 Carbonauts Captain
  */
-public class Jaw extends Subsystem implements Cruisable
-{
+public class Jaw extends Subsystem implements Diagnosable, Cruisable
+{	
+	public static final double MAX_SPEED = 0.5;
+	
 	/**
 	 * Motor that pushes and retracts the Jaw linkage
 	 * to compress the CONTAINER.
 	 */
-	private Talon jawMotor;
+	private CarbonTalon motor;
+	
+	private CarbonDigitalInput extentLimit;
+	
+	private CarbonDigitalInput retractLimit;
 	
 	/**
-	 * Motor that drives the gripping rollers that move
-	 * CONTAINERS from the Jaw to the Conveyer.
+	 * Senses how far extended or retracted the jaw is.
 	 */
-	private Talon feedMotor;
+	private CarbonAnalogInput extentSensor;
 	
 	/**
-	 * Limit switch that triggers when the Jaw is in its
-	 * fully retracted position.
+	 * Senses how far away the jaw is from the next container.
 	 */
-	private DigitalInput retractLimit;
+	private CarbonAnalogInput containerSensor;
 	
 	/**
-	 * Limit switch that triggers when the Jaw is in its
-	 * fully extended position.
+	 * Interfaces between the PIDController and this subsystem.
 	 */
-	private DigitalInput extendLimit;
+	private JawPIDAdapter pidAdapter;
 	
 	/**
-	 * Limit switch that triggers when the Jaw has a container
-	 * firmly grasped in its rollers.
+	 * PID Control loop for this subsystem.
 	 */
-	private DigitalInput clampLimit;
+	private PIDController pidController;
+	
+	private double p = 1.0/1000.0;
+	private double i = 0.0;
+	private double d = 0.0;
 	
 	/**
-	 * Limit switch that triggers when the Jaw has
-	 * encountered a new CONTAINER (i.e. the robot
-	 * has driven the Jaw into contact with a
-	 * CONTAINER).
+	 * Stores the name of the last action taken
+	 * by this subsystem.
 	 */
-	private DigitalInput encounterLimit;
-	
-	private LatchBoolean hitContainer;
-	
-	private double cruiseSpeed = 0.6; //TODO Find appropriate value for default.
-	
-	private double feedSpeed = 0.6; //TODO Find appropriate value for default.
+	private String lastOperation = "";
 	
 	/**
-	 * Constructs the Jaw subsystem.
+	 * Whether PID is currently active in this subsystem.
+	 */
+	private boolean pidEnabled = false;
+	
+	/**
+	 * The speed to resort to when operating in non-PID
+	 * conditions.
+	 */
+	private double cruiseSpeed = 0.4; //TODO Find appropriate value for default.
+	
+	/**
+	 * Constructor
 	 */
 	public Jaw()
 	{
-		jawMotor = new Talon(Robot.JAW_GRAB_MOTOR);
-		feedMotor = new Talon(Robot.JAW_FEED_MOTOR);
-		retractLimit = new DigitalInput(Robot.JAW_LIMIT_RETRACT);
-		extendLimit = new DigitalInput(Robot.JAW_LIMIT_EXTENT);
-		clampLimit = new DigitalInput(Robot.JAW_LIMIT_CLAMP);
-		encounterLimit = new DigitalInput(Robot.JAW_LIMIT_ENCOUNTER);
-		hitContainer = new LatchBoolean();
+		super("Jaw");
+		motor = new CarbonTalon(Robot.JAW_MOTOR, 0.025, 20);
+		motor.setRampEnabled(true);
+		
+		pidAdapter = new JawPIDAdapter();
+		pidController = new PIDController(p, i, d, pidAdapter, pidAdapter);
+		
+		extentLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_EXTENT);
+		retractLimit = new CarbonDigitalInput(Robot.JAW_LIMIT_RETRACT);
+		extentSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_EXTENT, CarbonAnalogInput.SmoothingMode.MEDIAN, 16, 10);
+		containerSensor = new CarbonAnalogInput(Robot.JAW_DISTANCE_APPROACH, CarbonAnalogInput.SmoothingMode.MEDIAN, 8, 20);
+		
+		pidController.setOutputRange(-0.3, 0.3);
 	}
 	
 	@Override
 	protected void initDefaultCommand() 
 	{
-		
-	}
-	
-	/**
-	 * Sets the feeders to roll at the specified speed.
-	 * @param speed
-	 */
-	public void feed(double speed)
-	{
-		if(speed > 1.0)
-		{
-			speed = 1.0;
-		}
-		else if(speed < -1.0)
-		{
-			speed = -1.0;
-		}
-		feedMotor.set(speed);
-	}
-	
-	/**
-	 * Spins the feeder rollers to pull a container up and into
-	 * the jaw.  Should be called after clamp().
-	 */
-	public void feedIn()
-	{
-		if(feedSpeed > 0)
-		{
-			feed(this.feedSpeed);
-		}
-		else
-		{
-			feed(-this.feedSpeed);
-		}
-	}
-	
-	/**
-	 * Spins the feeder rollers to release a container from the
-	 * jaw, lowering it out of the grasp.
-	 */
-	public void feedOut()
-	{
-		if(this.feedSpeed > 0)
-		{
-			feedMotor.set(-this.feedSpeed);
-		}
-		else
-		{
-			feedMotor.set(this.feedSpeed);
-		}
+		this.setDefaultCommand(new OperatorJawCommand());;
 	}
 	
 	/**
 	 * Actuates the jaw at the given speed.
 	 * @param speed
 	 */
-	public void moveJaw(double speed)
+	public void set(double speed)
 	{
-		if(speed > 1.0)
+		speed = (speed > MAX_SPEED) ? MAX_SPEED : speed; //Speed top cap
+		speed = (speed < -MAX_SPEED) ? -MAX_SPEED : speed; //Speed bottom cap
+		
+		speed = Robot.JAW_INVERTED ? -speed : speed;
+		
+		if(speed < 0) //Extending
 		{
-			speed = 1.0;
+			if(isFullyExtended()) //Safety for extending.
+			{
+				speed = 0.0;
+			}
 		}
-		else if(speed < -1.0)
+		else if(speed > 0) //Retracting
 		{
-			speed = -1.0;
+			if(isFullyRetracted()) //Safety for retracting.
+			{
+				speed = 0.0;
+			}
 		}
 		
-		if(speed > 0)
-		{
-			if(fullyExtended()) //Safety for extending.
-			{
-				speed = 0.0;
-			}
-		}
-		else if(speed < 0)
-		{
-			if(fullyRetracted()) //Safety for retracting.
-			{
-				speed = 0.0;
-			}
-		}
-		jawMotor.set(speed);
+		motor.set(speed);
+		lastOperation = "moveJaw(" + speed + ")";
 	}
 	
 	/**
@@ -167,39 +139,14 @@ public class Jaw extends Subsystem implements Cruisable
 	 */
 	public void retract()
 	{
-		if(!fullyRetracted())
+		if(!isFullyRetracted())
 		{
-			if(this.cruiseSpeed > 0)
-			{
-				moveJaw(-this.cruiseSpeed);
-			}
-			else
-			{
-				moveJaw(this.cruiseSpeed);
-			}
+			set(getCruiseSpeed());
+			lastOperation = "retract()";
 		}
 		else
 		{
-			jawMotor.stopMotor();
-		}
-	}
-	
-	/**
-	 * Retracts the jaw just enough to clamp the container between the
-	 * jaw and the feed rollers.
-	 */
-	public void clamp()
-	{
-		if(!containerClamped())
-		{
-			if(this.cruiseSpeed > 0)
-			{
-				jawMotor.set(-this.cruiseSpeed);
-			}
-			else
-			{
-				jawMotor.set(this.cruiseSpeed);
-			}
+			stop();
 		}
 	}
 	
@@ -208,49 +155,124 @@ public class Jaw extends Subsystem implements Cruisable
 	 */
 	public void extend()
 	{
-		if(!fullyExtended())
+		if(!isFullyExtended())
 		{
-			if(this.cruiseSpeed > 0)
-			{
-				jawMotor.set(this.cruiseSpeed);
-			}
-			else
-			{
-				jawMotor.set(-this.cruiseSpeed);
-			}
+			set(-getCruiseSpeed());
+			lastOperation = "extend()";
+		}
+		else
+		{
+			stop();
 		}
 	}
 	
-	public boolean encounteredContainer()
+	/**
+	 * Stops the jaw motor and kills PID.
+	 */
+	public void stop()
 	{
-		return hitContainer.onTrue(encounterLimit.get());
+		setPIDEnabled(false);
+		motor.stopMotor();
 	}
 	
 	/**
-	 * True if the jaw is fully retracted.
-	 * @return
+	 * Returns true if the jaw is fully extended.
+	 * @return True if the jaw is fully extended.
 	 */
-	public boolean fullyRetracted()
+	public boolean isFullyExtended()
 	{
-		return retractLimit.get(); //TODO invert if necessary.
+		return !extentLimit.get();
 	}
 	
 	/**
-	 * True if the jaw is fully extended.
-	 * @return
+	 * Returns true if the jaw is fully retracted.
+	 * @return True if the jaw is fully retracted.
 	 */
-	public boolean fullyExtended()
+	public boolean isFullyRetracted()
 	{
-		return extendLimit.get();
+		return !retractLimit.get();
 	}
 	
 	/**
-	 * True if a container is fully clamped inside the jaw.
+	 * Gets the analog value of the jaw extent,
+	 * indicating how extended the jaw is.
 	 * @return
 	 */
-	public boolean containerClamped()
+	public double getExtent()
 	{
-		return clampLimit.get(); //TODO invert if necessary.
+		return extentSensor.getMedianSmoothedValue();
+	}
+	
+	/**
+	 * Returns the distance from the jaw to the next container.
+	 * @return The distance from the jaw to the next container.
+	 */
+	public double getContainerDistance()
+	{
+		return containerSensor.getMedianSmoothedValue();
+	}
+	
+	/**
+	 * Sets the PID setpoint for use with PID mode.
+	 * @param setpoint The PID setpoint.
+	 */
+	public void setSetpoint(double setpoint)
+	{
+		pidController.setSetpoint(setpoint);
+	}
+	
+	/**
+	 * Sets the PID to enabled or disabled.
+	 * @param enabled Whether to enable or disable.
+	 */
+	public void setPIDEnabled(boolean enabled)
+	{
+		/*
+		 * If the subsystem PID setting is already at
+		 * whatever this method call is ordering, then
+		 * ignore it.
+		 */
+		if(pidEnabled == enabled)
+		{
+			return;
+		}
+
+		pidController.reset();
+		pidEnabled = enabled;		
+		if(pidEnabled)
+		{
+			pidController.enable();
+		}
+		else
+		{
+			motor.stopMotor();
+		}
+		lastOperation = "setPIDEnabled(" + enabled + ")";
+	}
+	
+	/**
+	 * Interfaces between the PIDController and the Subsystem.
+	 * @author Nick Mosher, Team 1829 Carbonauts Captain
+	 */
+	public class JawPIDAdapter implements PIDSource, PIDOutput
+	{
+		public JawPIDAdapter()
+		{
+			
+		}
+
+		public void pidWrite(double output) 
+		{
+			if(pidEnabled)
+			{
+				set(output);
+			}
+		}
+
+		public double pidGet() 
+		{	
+			return getExtent();
+		}
 	}
 
 	/**
@@ -259,13 +281,10 @@ public class Jaw extends Subsystem implements Cruisable
 	 */
 	public void setCruiseSpeed(double speed) 
 	{
+		speed = (speed > 0) ? speed : -speed;
 		if(speed > 1.0)
 		{
 			speed = 1.0;
-		}
-		else if(speed < 0)
-		{
-			speed = 0;
 		}
 		this.cruiseSpeed = speed;
 	}
@@ -277,31 +296,48 @@ public class Jaw extends Subsystem implements Cruisable
 	{	
 		return this.cruiseSpeed;
 	}
-	
+
 	/**
-	 * Sets the speed to be used in feedIn() and feedOut().
-	 * More precise control can be achieved with feed(double speed).
-	 * @param speed The cruise speed for the feeder.
+	 * Diagnostic command to retrieve a status.
 	 */
-	public void setFeedSpeed(double speed)
+	public String getStatus() 
+	{	
+		DecimalFormat formatter = new DecimalFormat("000.00");
+		StringBuffer response = new StringBuffer("[" + getName() + "]");
+		response.append(" Extent: ").append(formatter.format(getExtent()));
+		response.append(" Approach: ").append(formatter.format(getContainerDistance()));
+		response.append(" FullExt:").append(isFullyExtended() ? "T" : "F");
+		response.append(" FullRet:").append(isFullyRetracted() ? "T" : "F");
+		return response.toString();
+	}
+
+	/**
+	 * Displays critical statuses on the Dashboard.
+	 */
+	public void updateSmartDS() 
 	{
-		if(speed > 1.0)
-		{
-			speed = 1.0;
-		}
-		else if(speed < 0)
-		{
-			speed = 0;
-		}
-		this.feedSpeed = speed;
+		SmartDashboard.putNumber("Extent Sensor", getExtent());
+		SmartDashboard.putNumber("Extent Graph", getExtent());
+		SmartDashboard.putNumber("Container Sensor", getContainerDistance());
+		SmartDashboard.putNumber("Container Graph", getContainerDistance());
+		SmartDashboard.putBoolean("Jaw Extended", isFullyExtended());
+		SmartDashboard.putBoolean("Jaw Retracted", isFullyRetracted());
+		SmartDashboard.putString("Jaw Last Operation", lastOperation());
+	}
+
+	/**
+	 * Tells the last action this subsystem did.
+	 */
+	public String lastOperation() 
+	{	
+		return lastOperation;
 	}
 	
-	/**
-	 * Returns the speed of the feeder while in use with feedIn() and feedOut().
-	 * @return
-	 */
-	public double getFeedSpeed()
+	public String getDIOFeedback()
 	{
-		return this.feedSpeed;
+		StringBuffer feedback = new StringBuffer();
+		feedback.append(extentLimit.getChannel()).append(":").append(isFullyExtended() ? "T" : "F").append(" ");
+		feedback.append(retractLimit.getChannel()).append(":").append(isFullyRetracted() ? "T" : "F").append(" ");
+		return feedback.toString();
 	}
 }
